@@ -39,7 +39,7 @@ class CoreIOTest(unittest.TestCase):
         dataset_info = parse_csv_raw(test_files_path)
         self.assertEqual(dataset_info.column_names, ['f1', 'f2', 'f3', 'f4'])
         self.assertEqual(dataset_info.col_delimiter, ',')
-        self.assertEqual(dataset_info.column_types, {})
+        self.assertEqual(dataset_info.column_types, set())
 
 
 if __name__ == '__main__':
