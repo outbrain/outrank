@@ -6,3 +6,4 @@
 4. Gradual speedups/rewrites of main algorithms
 5. Documenting new/extra features (subfeatures etc.)
 6. Get rid of Pandas, let's use something more efficient instead
+7. Tree-based explanation for stream-like data
