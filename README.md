@@ -39,7 +39,7 @@ OutRank's primary use case is as a CLI tool, begin exploring with
 outrank --help
 ```
 
-A minimal showcase is demonstrated with [this example](./run_minimal.sh)
+A minimal showcase is demonstrated with [this example](./scripts/run_minimal.sh)
 
 # Contributing
 1. Make sure the functionality is not already implemented!
