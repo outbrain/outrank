@@ -42,6 +42,13 @@ pro_tips = [
 ]
 
 
+def write_json_dump_to_file(args: Any, config_name: str) -> None:
+
+    out_content = json.dumps(args.__dict__)
+    with open(config_name, 'w') as out_config:
+        out_config.write(out_content)
+
+
 def internal_hash(input_obj: str) -> str:
     """A generic internal hash used throughout ranking procedure - let's hardcode seed here for sure"""
     return xxhash.xxh32(input_obj, seed=20141025).hexdigest()
