@@ -24,6 +24,7 @@
             <h2>Contents</h2>
             <ul>
   <li><a href="#welcome-to-outranks-documentation">Welcome to OutRank's documentation!</a></li>
+  <li><a href="#use-and-installation-cli">Use and installation - CLI</a></li>
 </ul>
 
 
@@ -67,6 +68,37 @@ outrank    </h1>
 <h1 id="welcome-to-outranks-documentation">Welcome to OutRank's documentation!</h1>
 
 <p>All functions/methods can be searched-for (search bar on the left).</p>
+
+<p>This tool enables fast screening of feature-feature interactions. Its purpose is to give the user fast insight into potential redundancies/anomalies in the data.
+It is implemented to operate in _mini batches_, it traverses the <code>raw data</code> incrementally, refining the rankings as it goes along.
+The interaction ranking outputs triplets which look as follows:</p>
+
+<pre><code>featureA    featureB    0.512
+featureA    featureC    0.125
+</code></pre>
+
+<h1 id="use-and-installation-cli">Use and installation - CLI</h1>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>outrank
+</code></pre>
+</div>
+
+<p>and test a minimal cycle with</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code>outrank<span class="w"> </span>--task<span class="w"> </span>selftest
+</code></pre>
+</div>
+
+<p>if this passes, you can be pretty certain OutRank will perform as intended. OutRank's primary use case is as a CLI tool, begin exploring with</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code>outrank<span class="w"> </span>--help
+</code></pre>
+</div>
+
+<p>A minimal showcase of performing feature ranking on a generic CSV is demonstrated with <a href="../scripts/run_minimal.sh">this example</a></p>
 </div>
 
                         <input id="mod-outrank-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
@@ -76,16 +108,15 @@ outrank    </h1>
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="sd">.. include:: ../DOCS.md</span>
 </span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a>
-</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
-</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
-</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="kn">import</span> <span class="nn">logging</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a>    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>    <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">-%b-%y %H:%M:%S&#39;</span><span class="p">,</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="p">)</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a>
+</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="kn">import</span> <span class="nn">logging</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a>    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a>    <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">-%b-%y %H:%M:%S&#39;</span><span class="p">,</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="p">)</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 </span></pre></div>
 
 
