@@ -33,4 +33,4 @@ jobs:
 
     - name: Run benchmark tests
       run: |
-        bash run_benchmarks.sh CI
+        bash scripts/run_benchmarks.sh CI
