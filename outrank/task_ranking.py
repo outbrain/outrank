@@ -16,6 +16,7 @@ from outrank.core_utils import display_tool_name
 from outrank.core_utils import get_dataset_info
 from outrank.core_utils import summarize_feature_bounds_for_transformers
 from outrank.core_utils import summarize_rare_counts
+from outrank.core_utils import write_json_dump_to_file
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 signal.signal(signal.SIGINT, signal.default_int_handler)
@@ -274,11 +275,13 @@ def outrank_task_conduct_ranking(args: Any):
         os.path.join(args.output_folder, 'pairwise_ranks.tsv'), sep='\t', index=False,
     )
 
+    # Write timings and config for replicability
     dfx = pd.DataFrame(all_timings)
     dfx.to_json(f'{args.output_folder}/timings.json')
+    write_json_dump_to_file(args, f'{args.output_folder}/arguments.json')
 
     logging.info(
-        f'Finished with ranking! Result stored as: {args.output_folder}/pairwise_ranks.tsv.',
+        f'Finished with ranking! Result stored as: {args.output_folder}/pairwise_ranks.tsv. Cleaning up tmp files ..',
     )
 
     os.remove('ranking_checkpoint_tmp.tsv')
