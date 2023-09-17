@@ -30,6 +30,6 @@ outrank --help
 
 
 # Example use cases
-* A minimal showcase of performing feature ranking on a generic CSV is demonstrated with [this example](../scripts/run_minimal.sh)
+* A minimal showcase of performing feature ranking on a generic CSV is demonstrated with [this example](https://github.com/outbrain/outrank/tree/main/scripts)
 
-* [More examples](../scripts/) demonstrating OutRank's capabilities are also available.
+* [More examples](https://github.com/outbrain/outrank/tree/main/examples) demonstrating OutRank's capabilities are also available.
