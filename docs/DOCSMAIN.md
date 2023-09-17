@@ -11,7 +11,7 @@ featureA	featureC	0.125
 ```
 
 
-# Innstallation
+# Setup
 ```bash
 pip install outrank
 ```

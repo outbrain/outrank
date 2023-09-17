@@ -27,6 +27,8 @@ usage_examples = """
 
     # Higher order interactions
     outrank --task all --data_path pathToSomeData --data_source csv-raw --heuristic MI-numba-randomized --target_ranking_only True --combination_number_upper_bound 2048 --num_threads 8 --interaction_order 3 --output_folder ./ranking_outputs --subsampling 20
+
+    # More docs and use cases at https://improved-dollop-9k1wgvm.pages.github.io/outrank.html
 """
 
 
@@ -97,7 +99,7 @@ def main():
         '--heuristic',
         type=str,
         default='MI-numba-randomized',
-        help='Selected heuristic (that performs feature scoring).',
+        help='Selected heuristic (that performs feature scoring). For full list please see the docs: https://improved-dollop-9k1wgvm.pages.github.io/outrank/algorithms/importance_estimator.html#get_importances_estimate_pairwise',
     )
 
     parser.add_argument(
