@@ -11,7 +11,7 @@ featureA	featureC	0.125
 ```
 
 
-# Use and installation - first steps (OutRank as a CLI)
+# Innstallation
 ```bash
 pip install outrank
 ```

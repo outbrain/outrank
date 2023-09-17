@@ -28,7 +28,7 @@ outrank \
     --data_source csv-raw \
     --heuristic MI-numba-randomized \
     --target_ranking_only True \
-    --interaction_order 2 \
+    --interaction_order 3 \
     --combination_number_upper_bound 2048 \
     --num_threads 50 \
     --output_folder ./some_output_folder_triplets \

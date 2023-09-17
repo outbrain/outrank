@@ -28,8 +28,8 @@ Minimal examples and an interface to explore OutRank's functionality are availab
 
 # Contributing
 1. Make sure the functionality is not already implemented!
-2. Decide whether where the functionality would fit best (is it an algorithm? A parser?)
-3. Open a PR with rationale
+2. Decide where the functionality would fit best (is it an algorithm? A parser?)
+3. Open a PR with the implementation
 
 # Bugs and other reports
 Feel free to open a PR that contains:
