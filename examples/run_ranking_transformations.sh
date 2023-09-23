@@ -6,7 +6,7 @@
 
 # hint - if unsure what parameters do, you can always run "outrank --help"
 # Example considering some generic transformations of features. Note that OutRank is type aware, if using formats such as ob-vw or ob-csv,
-# type-aware transformations can be produced. See e.g., https://improved-dollop-9k1wgvm.pages.github.io/outrank.html?search=ob-vw for more details on the format.
+# type-aware transformations can be produced. See e.g., https://outbrain.github.io/outrank/outrank/algorithms/importance_estimator.html?search=ob-vw for more details on the format.
 outrank \
     --task all \
     --data_path $PATH_TO_YOUR_DATA \

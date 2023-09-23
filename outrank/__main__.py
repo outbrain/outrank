@@ -28,7 +28,7 @@ usage_examples = """
     # Higher order interactions
     outrank --task all --data_path pathToSomeData --data_source csv-raw --heuristic MI-numba-randomized --target_ranking_only True --combination_number_upper_bound 2048 --num_threads 8 --interaction_order 3 --output_folder ./ranking_outputs --subsampling 20
 
-    # More docs and use cases at https://improved-dollop-9k1wgvm.pages.github.io/outrank.html
+    # More docs and use cases at https://outbrain.github.io/outrank/outrank.html
 """
 
 
@@ -85,21 +85,21 @@ def main():
         '--combination_number_upper_bound',
         type=int,
         default=2**15,
-        help='Cap the number of generated combinations (random sampling of that space).',
+        help='Cap the number of columns during feature ranking, per batch. This means that if you were to evaluate e.g., 100k combinations, this parameter results in behavior where only 2 ** 15 are taken into account (randomly) each bach, resulting in a monte-carlo like sampling scheme that yields estimates of the final ranks when all data is seen.',
     )
 
     parser.add_argument(
         '--missing_value_symbols',
         type=str,
         default=',{}',
-        help='What symbols denote missing values? Comma-separate them.',
+        help='What symbols denote missing values? Comma-separate them - if comma is a missing symbol itself please open an issue.',
     )
 
     parser.add_argument(
         '--heuristic',
         type=str,
         default='MI-numba-randomized',
-        help='Selected heuristic (that performs feature scoring). For full list please see the docs: https://improved-dollop-9k1wgvm.pages.github.io/outrank/algorithms/importance_estimator.html#get_importances_estimate_pairwise',
+        help='Selected heuristic (that performs feature scoring). For full list please see the docs: https://outbrain.github.io/outrank/outrank/algorithms/importance_estimator.html',
     )
 
     parser.add_argument(
@@ -124,21 +124,21 @@ def main():
     )
 
     parser.add_argument(
-        '--num_threads', type=int, default=8, help='Number of threads to consider',
+        '--num_threads', type=int, default=8, help='Number of threads to consider. More threads implies faster ranking, however, there will be some memory overhead. Should be as large as the machine can handle memory-wise.',
     )
 
     parser.add_argument(
         '--label_column',
         type=str,
         default='label',
-        help='Name of the target attribute (useful for visualization)',
+        help='Name of the target attribute for ranking. Note that this can be any other feature for most implemented heuristics.',
     )
 
     parser.add_argument(
         '--transformers',
         type=str,
         default='none',
-        help='Collection of which feature transformations to consider',
+        help='Collection of which feature transformations to consider. Examples are: fw-transformers, default',
     )
 
     parser.add_argument(
@@ -187,7 +187,7 @@ def main():
         '--subfeature_mapping',
         type=str,
         default='False',
-        help='Compute sub-features on-the fly. Example: featureA->featureB implies features based on each value of featureA will be considered.',
+        help='Compute sub-features on-the fly. Example: featureA->featureB implies features based on each value of featureA will be considered. So, feature names will correspond to values of the first feature, with actual values being constructed based on the second feature (two or more possible values).',
     )
 
     parser.add_argument(

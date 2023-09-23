@@ -10,10 +10,9 @@ outrank \
     --data_path $PATH_TO_YOUR_DATA \
     --data_source csv-raw \
     --heuristic MI-numba-randomized \
+    --subfeature_mapping f12->f32;f1<->f41 \
     --target_ranking_only True \
     --combination_number_upper_bound 2048 \
     --num_threads 12 \
-    --interaction_order 1 \
-    --transformers fw-transformers \
     --output_folder ./some_output_folder \
-    --subsampling 30
+    --subsampling 10
