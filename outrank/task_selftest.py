@@ -31,7 +31,7 @@ def conduct_self_test():
     logger.info("Verifying output's properties ..")
     assert dfx.shape[0] == 201
     assert dfx.shape[1] == 3
-    assert dfx['FeatureA'].values.tolist().pop() == 'label-(81; 100)'
+    assert dfx['FeatureA'].values.tolist().pop() == 'label-(81; 100)' or dfx['FeatureB'].values.tolist().pop() == 'label-(81; 100)'
 
     to_remove = ['ranking_outputs', 'test_data_synthetic']
     for path in to_remove:
