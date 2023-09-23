@@ -44,13 +44,6 @@ IGNORED_VALUES = set()
 HYPERLL_ERROR_BOUND = 0.02
 
 
-def encode_int_column(input_tuple: tuple[str, Any]) -> tuple[Any, list[int]]:
-    """Encode column values as categoric (at a batch level!)"""
-
-    hashes, _ = pd.factorize(input_tuple[1])
-    return input_tuple[0], hashes
-
-
 def mixed_rank_graph(
     input_dataframe: pd.DataFrame, args: Any, cpu_pool: Any, pbar: Any,
 ) -> BatchRankingSummary:
@@ -59,21 +52,14 @@ def mixed_rank_graph(
     all_columns = input_dataframe.columns
 
     triplets = []
-    tmp_df = input_dataframe.copy()
+    tmp_df = input_dataframe.copy().astype('category')
     out_time_struct = {}
 
     # Handle cont. types prior to interaction evaluation
     pbar.set_description('Encoding columns')
-    jobs = [(cname, tmp_df[cname]) for cname in all_columns]
     col_dots = '.'
     start_enc_timer = timer()
-    with cpu_pool as p:
-        results = p.amap(encode_int_column, jobs)
-        while not results.ready():
-            time.sleep(4)
-            col_dots = col_dots + '.'
-            pbar.set_description(f'Encoding columns .{col_dots}')
-        tmp_df = pd.DataFrame({k: v for k, v in results.get()})
+    tmp_df = pd.DataFrame({k : tmp_df[k].cat.codes for k in all_columns})
     end_enc_timer = timer()
     out_time_struct['encoding_columns'] = end_enc_timer - start_enc_timer
 
