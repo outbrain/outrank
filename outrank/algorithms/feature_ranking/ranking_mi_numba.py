@@ -29,21 +29,22 @@ def numba_unique(a):
 
 
 @njit(
-    'float32(int32[:], int32[:], int32, float32)',
+    'float32(int32[:], int32[:], int32, float32, int32[:])',
     cache=True,
     fastmath=True,
     error_model='numpy',
     boundscheck=True,
 )
-def compute_conditional_entropy(Y_classes, class_values, class_var_shape, initial_prob):
+def compute_conditional_entropy(Y_classes, class_values, class_var_shape, initial_prob, nonzero_counts):
     conditional_entropy = 0.0
-
+    index = 0
     for c in class_values:
-        conditional_prob = np.count_nonzero(Y_classes == c) / class_var_shape
+        conditional_prob = nonzero_counts[index] / class_var_shape
         if conditional_prob != 0:
             conditional_entropy -= (
                 initial_prob * conditional_prob * np.log(conditional_prob)
             )
+        index += 1
 
     return conditional_entropy
 
@@ -81,8 +82,15 @@ def compute_entropies(
         initial_prob = _f_value_counts / all_events
         x_value_subspace = np.where(X == f_values[f_index])
         Y_classes = Y[x_value_subspace]
+        index = 0
+        nonzero_class_counts = np.zeros(len(class_values), dtype=np.int32)
+
+        # Cache nonzero counts
+        for c in class_values:
+            nonzero_class_counts[index] = np.count_nonzero(Y_classes == c)
+            index += 1
         conditional_entropy += compute_conditional_entropy(
-            Y_classes, class_values, _f_value_counts, initial_prob,
+            Y_classes, class_values, _f_value_counts, initial_prob, nonzero_class_counts,
         )
 
         if cardinality_correction:
@@ -90,7 +98,7 @@ def compute_entropies(
             Y_classes = np.roll(Y, _f_value_counts)[x_value_subspace]
 
             background_cond_entropy += compute_conditional_entropy(
-                Y_classes, class_values, _f_value_counts, initial_prob,
+                Y_classes, class_values, _f_value_counts, initial_prob, nonzero_class_counts,
             )
 
     if not cardinality_correction:
