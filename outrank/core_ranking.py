@@ -58,8 +58,6 @@ def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) ->
 
     return tmp
 
-def update_comb_count_cache(combination: tuple[Any, ...]) -> None:
-    GLOBAL_PRIOR_COMB_COUNTS.update({combination: 1})
 
 def mixed_rank_graph(
     input_dataframe: pd.DataFrame, args: Any, cpu_pool: Any, pbar: Any,
