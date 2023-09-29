@@ -39,7 +39,7 @@ logger.setLevel(logging.DEBUG)
 random.seed(a=123, version=2)
 GLOBAL_CARDINALITY_STORAGE: dict[Any, Any] = dict()
 GLOBAL_RARE_VALUE_STORAGE: dict[str, Any] = Counter()
-GLOBAL_PRIOR_COMB_COUNTS: dict[Any, int] = dict()
+GLOBAL_PRIOR_COMB_COUNTS: dict[Any, int] = Counter()
 IGNORED_VALUES = set()
 HYPERLL_ERROR_BOUND = 0.02
 
@@ -48,22 +48,18 @@ def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) ->
 
     if len(GLOBAL_PRIOR_COMB_COUNTS) == 0:
         for combination in combinations:
-            update_comb_count_cache(combination)
+            GLOBAL_PRIOR_COMB_COUNTS.update({combination: 1})
         tmp = combinations[:args.combination_number_upper_bound]
     else:
         tmp = list(x[0] for x in sorted(GLOBAL_PRIOR_COMB_COUNTS.items(), key=lambda x:x[1], reverse=False))[:args.combination_number_upper_bound]
 
     for combination in tmp:
-        update_comb_count_cache(combination)
+        GLOBAL_PRIOR_COMB_COUNTS.update({combination: 1})
 
     return tmp
 
 def update_comb_count_cache(combination: tuple[Any, ...]) -> None:
-
-    if combination in GLOBAL_PRIOR_COMB_COUNTS:
-        GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
-    else:
-        GLOBAL_PRIOR_COMB_COUNTS[combination] = 1
+    GLOBAL_PRIOR_COMB_COUNTS.update({combination: 1})
 
 def mixed_rank_graph(
     input_dataframe: pd.DataFrame, args: Any, cpu_pool: Any, pbar: Any,
