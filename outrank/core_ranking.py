@@ -48,13 +48,13 @@ def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) ->
 
     if len(GLOBAL_PRIOR_COMB_COUNTS) == 0:
         for combination in combinations:
-            GLOBAL_PRIOR_COMB_COUNTS.update({combination: 1})
+            GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
         tmp = combinations[:args.combination_number_upper_bound]
     else:
         tmp = list(x[0] for x in sorted(GLOBAL_PRIOR_COMB_COUNTS.items(), key=lambda x:x[1], reverse=False))[:args.combination_number_upper_bound]
 
     for combination in tmp:
-        GLOBAL_PRIOR_COMB_COUNTS.update({combination: 1})
+        GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
 
     return tmp
 
