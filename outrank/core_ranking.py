@@ -39,9 +39,24 @@ logger.setLevel(logging.DEBUG)
 random.seed(a=123, version=2)
 GLOBAL_CARDINALITY_STORAGE: dict[Any, Any] = dict()
 GLOBAL_RARE_VALUE_STORAGE: dict[str, Any] = Counter()
-
+GLOBAL_PRIOR_COMB_COUNTS: dict[Any, int] = Counter()
 IGNORED_VALUES = set()
 HYPERLL_ERROR_BOUND = 0.02
+
+def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) -> list[tuple[Any, ...]]:
+    """Make sure only relevant subspace of combinations is selected based on prior counts"""
+
+    if len(GLOBAL_PRIOR_COMB_COUNTS) == 0:
+        for combination in combinations:
+            GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
+        tmp = combinations[:args.combination_number_upper_bound]
+    else:
+        tmp = list(x[0] for x in sorted(GLOBAL_PRIOR_COMB_COUNTS.items(), key=lambda x:x[1], reverse=False))[:args.combination_number_upper_bound]
+
+    for combination in tmp:
+        GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
+
+    return tmp
 
 
 def mixed_rank_graph(
@@ -91,8 +106,8 @@ def mixed_rank_graph(
     if (args.target_ranking_only == 'True') and ('3mr' not in args.heuristic):
         combinations = [x for x in combinations if args.label_column in x]
 
+    combinations = prior_combinations_sample(combinations, args)
     random.shuffle(combinations)
-    combinations = combinations[: args.combination_number_upper_bound]
 
     if args.heuristic == 'Constant':
         final_constant_imp = []
