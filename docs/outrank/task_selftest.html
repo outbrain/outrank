@@ -81,7 +81,7 @@
 </span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>        <span class="s1">&#39;outrank --task data_generator --num_synthetic_rows 100000&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>    <span class="p">)</span>
 </span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>        <span class="s1">&#39;outrank --task ranking --data_path test_data_synthetic --data_source csv-raw;&#39;</span><span class="p">,</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>        <span class="s1">&#39;outrank --task ranking --data_path test_data_synthetic --data_source csv-raw --combination_number_upper_bound 60;&#39;</span><span class="p">,</span>
 </span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a>        <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>    <span class="p">)</span>
 </span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a>
@@ -132,7 +132,7 @@
 </span><span id="conduct_self_test-23"><a href="#conduct_self_test-23"><span class="linenos">23</span></a>        <span class="s1">&#39;outrank --task data_generator --num_synthetic_rows 100000&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span id="conduct_self_test-24"><a href="#conduct_self_test-24"><span class="linenos">24</span></a>    <span class="p">)</span>
 </span><span id="conduct_self_test-25"><a href="#conduct_self_test-25"><span class="linenos">25</span></a>    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-</span><span id="conduct_self_test-26"><a href="#conduct_self_test-26"><span class="linenos">26</span></a>        <span class="s1">&#39;outrank --task ranking --data_path test_data_synthetic --data_source csv-raw;&#39;</span><span class="p">,</span>
+</span><span id="conduct_self_test-26"><a href="#conduct_self_test-26"><span class="linenos">26</span></a>        <span class="s1">&#39;outrank --task ranking --data_path test_data_synthetic --data_source csv-raw --combination_number_upper_bound 60;&#39;</span><span class="p">,</span>
 </span><span id="conduct_self_test-27"><a href="#conduct_self_test-27"><span class="linenos">27</span></a>        <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span id="conduct_self_test-28"><a href="#conduct_self_test-28"><span class="linenos">28</span></a>    <span class="p">)</span>
 </span><span id="conduct_self_test-29"><a href="#conduct_self_test-29"><span class="linenos">29</span></a>
