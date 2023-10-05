@@ -486,8 +486,8 @@ def compute_batch_ranking(
         else:
             focus_set = set(args.feature_set_focus.split(','))
 
-        focus_set = {x for x in focus_set if x in input_dataframe.columns}
         focus_set.add(args.label_column)
+        focus_set = {x for x in focus_set if x in input_dataframe.columns}
         input_dataframe = input_dataframe[list(focus_set)]
 
     if args.transformers != 'none':
