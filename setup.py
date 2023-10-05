@@ -23,7 +23,7 @@ def _read_description():
 packages = [x for x in setuptools.find_packages() if x != 'test']
 setuptools.setup(
     name='outrank',
-    version='0.94',
+    version='0.94.1',
     description='OutRank: Feature ranking for massive sparse data sets.',
     long_description=_read_description(),
     long_description_content_type='text/markdown',
