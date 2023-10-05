@@ -488,7 +488,7 @@ def compute_batch_ranking(
 
         focus_set.add(args.label_column)
         focus_set = {x for x in focus_set if x in input_dataframe.columns}
-        input_dataframe = input_dataframe[focus_set]
+        input_dataframe = input_dataframe[list(focus_set)]
 
     if args.transformers != 'none':
         pbar.set_description('Adding transformations')
