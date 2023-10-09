@@ -104,10 +104,11 @@ def get_importances_estimate_pairwise(combination, args, tmp_df):
     feature_two = combination[1]
 
     if feature_one not in tmp_df.columns:
-       logging.info(f'{feature_one} not found in the constructed data frame - consider increasing --combination_number_upper_bound for better coverage.')
-       return [feature_one, feature_two, 0]
+        logging.info(f'{feature_one} not found in the constructed data frame - consider increasing --combination_number_upper_bound for better coverage.')
+        return [feature_one, feature_two, 0]
     elif feature_two not in tmp_df.columns:
         logging.info(f'{feature_two} not found in the constructed data frame - consider increasing --combination_number_upper_bound for better coverage.')
+        return [feature_one, feature_two, 0]
 
     vector_first = tmp_df[[feature_one]].values.ravel()
     vector_second = tmp_df[[feature_two]].values.ravel()
