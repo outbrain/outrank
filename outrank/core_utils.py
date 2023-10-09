@@ -182,11 +182,14 @@ def parse_ob_line_vw(
 
     # Hash multi-value tuples and store name-val mappings
     for remaining_part in remainder:
-        core_parts = remaining_part.split(' ')
+        core_parts = remaining_part.strip().split(' ')
         namespace_part = core_parts[0]
         other_parts = '-'.join(x for x in core_parts[1:] if x != '')
+
         if namespace_part in fw_col_mapping:
             remainder_hash[fw_col_mapping[namespace_part]] = other_parts
+        else:
+            logging.error(f"Didn't find namespace {namespace_part}")
 
     # Construct the consistently-mapped instance based on the remainder mapping
     the_real_instance = [
@@ -200,6 +203,7 @@ def parse_ob_line_vw(
         ]
 
     parts = [label] + the_real_instance
+    print(parts, table_header)
     return parts
 
 

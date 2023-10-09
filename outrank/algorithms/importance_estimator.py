@@ -1,6 +1,7 @@
 # A module for pairwise computation of importances -- entrypoint for the core ranking algorighm(s)
 from __future__ import annotations
 
+import logging
 import operator
 import traceback
 from typing import Any
@@ -15,6 +16,9 @@ from sklearn.metrics import adjusted_mutual_info_score
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
+
+logger = logging.getLogger('syn-logger')
+logger.setLevel(logging.DEBUG)
 
 try:
     from outrank.algorithms.feature_ranking import ranking_mi_numba
@@ -99,6 +103,12 @@ def get_importances_estimate_pairwise(combination, args, tmp_df):
     feature_one = combination[0]
     feature_two = combination[1]
 
+    if feature_one not in tmp_df.columns:
+       logging.info(f'{feature_one} not found in the constructed data frame - consider increasing --combination_number_upper_bound for better coverage.')
+       return [feature_one, feature_two, 0]
+    elif feature_two not in tmp_df.columns:
+        logging.info(f'{feature_two} not found in the constructed data frame - consider increasing --combination_number_upper_bound for better coverage.')
+
     vector_first = tmp_df[[feature_one]].values.ravel()
     vector_second = tmp_df[[feature_two]].values.ravel()
 
@@ -156,10 +166,18 @@ def rank_features_3MR(
     def calc_higher_order(feature, is_redundancy=True):
         values = []
         for feat in ranked_features:
+            interaction_tuple = (feat, feature)
             if is_redundancy:
-                values.append(redundancy_dict[(feat, feature)])
+                if interaction_tuple in redundancy_dict:
+                    values.append(redundancy_dict[interaction_tuple])
+                else:
+                    logging.info('Not accounting for redundancy tuple {} - please increase the --combination_number_upper_bound for beter coverage of interactions/redundancies.')
             else:
-                values.append(relational_dict[(feat, feature)])
+                if interaction_tuple in relational_dict:
+                    values.append(relational_dict[interaction_tuple])
+                else:
+                    logging.info('Not accounting for interaction tuple {} - please increase the --combination_number_upper_bound for beter coverage of interactions/redundancies.')
+
         if strategy == 'sum':
             return sum(values)
         if strategy == 'mean':
