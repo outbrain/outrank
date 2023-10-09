@@ -72,9 +72,9 @@ def mixed_rank_graph(
 
     # Handle cont. types prior to interaction evaluation
     pbar.set_description('Encoding columns')
-    col_dots = '.'
     start_enc_timer = timer()
     tmp_df = pd.DataFrame({k : tmp_df[k].cat.codes for k in all_columns})
+
     end_enc_timer = timer()
     out_time_struct['encoding_columns'] = end_enc_timer - start_enc_timer
 
