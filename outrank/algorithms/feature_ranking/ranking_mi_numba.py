@@ -81,24 +81,25 @@ def compute_entropies(
 
         initial_prob = _f_value_counts / all_events
         x_value_subspace = np.where(X == f_values[f_index])
+
         Y_classes = Y[x_value_subspace]
-        index = 0
+        Y_classes_spoofed = np.roll(Y, _f_value_counts)[x_value_subspace]
+
         nonzero_class_counts = np.zeros(len(class_values), dtype=np.int32)
+        nonzero_class_counts_spoofed = np.zeros(len(class_values), dtype=np.int32)
 
         # Cache nonzero counts
-        for c in class_values:
+        for index, c in enumerate(class_values):
             nonzero_class_counts[index] = np.count_nonzero(Y_classes == c)
-            index += 1
+            nonzero_class_counts_spoofed[index] = np.count_nonzero(Y_classes_spoofed == c)
+
         conditional_entropy += compute_conditional_entropy(
             Y_classes, class_values, _f_value_counts, initial_prob, nonzero_class_counts,
         )
 
         if cardinality_correction:
-            # A neat hack that seems to work fine (permutations are expensive)
-            Y_classes = np.roll(Y, _f_value_counts)[x_value_subspace]
-
             background_cond_entropy += compute_conditional_entropy(
-                Y_classes, class_values, _f_value_counts, initial_prob, nonzero_class_counts,
+                Y_classes_spoofed, class_values, _f_value_counts, initial_prob, nonzero_class_counts_spoofed,
             )
 
     if not cardinality_correction:
