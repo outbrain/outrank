@@ -203,7 +203,7 @@ def parse_ob_line_vw(
         ]
 
     parts = [label] + the_real_instance
-    print(parts, table_header)
+
     return parts
 
 
