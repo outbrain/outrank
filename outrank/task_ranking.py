@@ -38,8 +38,9 @@ def outrank_task_conduct_ranking(args: Any):
     if args.task in ['identify_rare_values', 'feature_summary_transformers']:
         args.heuristic = 'Constant'
 
-    display_tool_name()
-    display_random_tip()
+    if args.silent != 'True':
+        display_tool_name()
+        display_random_tip()
 
     dataset_info = get_dataset_info(args)
 

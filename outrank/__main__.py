@@ -184,6 +184,13 @@ def main():
     )
 
     parser.add_argument(
+        '--silent',
+        type=str,
+        default='False',
+        help='Suppress the logo and tips.',
+    )
+
+    parser.add_argument(
         '--subfeature_mapping',
         type=str,
         default='False',
