@@ -53,6 +53,15 @@ def main():
         help='Suitable for data, not pre-split to batches, this parameter determines batch size - note that too large batch size can slow down the multithreaded score computation due to many thread allocations etc. This works ok for <300 features and up to 48 threads.',
     )
 
+
+    parser.add_argument(
+        '--mi_approximation_factor',
+        type=float,
+        default=1.0,
+        help='A parameter that determines what proportion of vectors is considered for MI computation. 1.0 defaults to full spaces, anything below will result in subsampled spaces. This is used for faster relation estimation (3MR heuristic).',
+    )
+
+
     parser.add_argument(
         '--output_folder',
         type=str,
