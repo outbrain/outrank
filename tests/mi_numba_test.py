@@ -17,31 +17,31 @@ class CompareStrategiesTest(unittest.TestCase):
     def test_mi_numba(self):
         a = np.random.random(10**6).reshape(-1).astype(np.int32)
         b = np.random.random(10**6).reshape(-1).astype(np.int32)
-        final_score = mutual_info_estimator_numba(a, b, np.float32(1.0), False)
+        final_score = mutual_info_estimator_numba(a, b, np.float32(1.0), False, 2)
         self.assertEqual(final_score, 0.0)
 
     def test_mi_numba_random(self):
         a = np.array([1, 0, 0, 0, 1, 1, 1, 0], dtype=np.int32)
         b = np.random.random(8).reshape(-1).astype(np.int32)
 
-        final_score = mutual_info_estimator_numba(a, b, np.float32(1.0), False)
+        final_score = mutual_info_estimator_numba(a, b, np.float32(1.0), False, 2)
         self.assertLess(final_score, 0.0)
 
     def test_mi_numba_mirror(self):
         a = np.array([1, 0, 0, 0, 1, 1, 1, 0], dtype=np.int32)
         b = np.array([1, 0, 0, 0, 1, 1, 1, 0], dtype=np.int32)
-        final_score = mutual_info_estimator_numba(a, b, np.float32(1.0), False)
+        final_score = mutual_info_estimator_numba(a, b, np.float32(1.0), False,2)
         self.assertGreater(final_score, 0.60)
 
     def test_mi_numba_longer_inputs(self):
         b = np.array([1, 0, 0, 0, 1, 1, 1, 0] * 10**5, dtype=np.int32)
-        final_score = mutual_info_estimator_numba(b, b, np.float32(1.0), False)
+        final_score = mutual_info_estimator_numba(b, b, np.float32(1.0), False, 2)
         self.assertGreater(final_score, 0.60)
 
     def test_mi_numba_permutation(self):
         a = np.array([1, 0, 0, 0, 1, 1, 1, 0] * 10**3, dtype=np.int32)
         b = np.array(np.random.permutation(a), dtype=np.int32)
-        final_score = mutual_info_estimator_numba(a, b, np.float32(1.0), False)
+        final_score = mutual_info_estimator_numba(a, b, np.float32(1.0), False, 2)
         self.assertLess(final_score, 0.05)
 
     def test_mi_numba_interaction(self):
@@ -52,13 +52,13 @@ class CompareStrategiesTest(unittest.TestCase):
         high = np.array([1, 0, 0, 0, 1, 1, 1, 1], dtype=np.int32)
 
         lowest_score = mutual_info_estimator_numba(
-            a, lowest, np.float32(1.0), False,
+            a, lowest, np.float32(1.0), False, 2,
         )
         medium_score = mutual_info_estimator_numba(
-            a, medium, np.float32(1.0), False,
+            a, medium, np.float32(1.0), False, 2,
         )
         high_score = mutual_info_estimator_numba(
-            a, high, np.float32(1.0), False,
+            a, high, np.float32(1.0), False, 2,
         )
 
         scores = [lowest_score, medium_score, high_score]
@@ -74,11 +74,11 @@ class CompareStrategiesTest(unittest.TestCase):
         ).astype(np.int32)
 
         score_independent_first = mutual_info_estimator_numba(
-            vector_first, vector_third, np.float32(1.0), False,
+            vector_first, vector_third, np.float32(1.0), False, 2,
         )
 
         score_independent_second = mutual_info_estimator_numba(
-            vector_second, vector_third, np.float32(1.0), False,
+            vector_second, vector_third, np.float32(1.0), False, 2,
         )
 
         # This must be very close to zero/negative
@@ -91,7 +91,7 @@ class CompareStrategiesTest(unittest.TestCase):
         ).astype(np.int32)
 
         score_combined = mutual_info_estimator_numba(
-            combined_feature, vector_third, np.float32(1.0), False,
+            combined_feature, vector_third, np.float32(1.0), False, 2,
         )
 
         # This must be in the range of identity
