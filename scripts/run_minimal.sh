@@ -15,7 +15,7 @@ cat avazu_sample.txt avazu_sample.txt avazu_sample.txt > tmp.txt; mv tmp.txt ava
 mkdir avazu; mv avazu_sample.txt avazu/data.csv;rm -rf avazu_sample.csv;
 
 # Run the feature ranking by using 3MR heuristic
-outrank --data_path avazu --data_source csv-raw --subsampling 1 --task all --heuristic MI-numba-randomized --target_ranking_only False --interaction_order 1 --output_folder ./ranking_outputs --minibatch_size 100 --label click --include_noise_baseline_features True;
+outrank --data_path avazu --data_source csv-raw --subsampling 1 --task all --heuristic MI-numba-3mr --target_ranking_only False --interaction_order 1 --output_folder ./ranking_outputs --minibatch_size 100 --label click --include_noise_baseline_features True;
 
 echo "Ranking outputs are present in benchmarks/ranking_outputs .."
 ls ranking_outputs;
