@@ -72,7 +72,7 @@ def sklearn_surrogate(
     return estimate_feature_importance
 
 
-def numba_mi(vector_first, vector_second, heuristic, approximation_factor=1.0):
+def numba_mi(vector_first, vector_second, heuristic, approximation_factor=1.0, min_support=2):
     if heuristic == 'MI-numba-randomized':
         cardinality_correction = True
 
@@ -84,6 +84,7 @@ def numba_mi(vector_first, vector_second, heuristic, approximation_factor=1.0):
         vector_second.reshape(-1).astype(np.int32),
         approximation_factor=np.float32(approximation_factor),
         cardinality_correction=cardinality_correction,
+        min_support=min_support,
     )
 
     return estimate_feature_importance
@@ -129,16 +130,16 @@ def get_importances_estimate_pairwise(combination, args, tmp_df):
     elif args.heuristic == 'MI-numba-3mr':
         if 'AND_REL' in feature_one or 'AND_REL' in feature_two:
             estimate_feature_importance = numba_mi(
-                vector_first, vector_second, args.heuristic, args.mi_approximation_factor,
+                vector_first, vector_second, args.heuristic, args.mi_approximation_factor, args.min_support,
             )
         else:
             estimate_feature_importance = numba_mi(
-                vector_first, vector_second, args.heuristic,
+                vector_first, vector_second, args.heuristic, args.min_support,
             )
 
     elif 'MI-numba' in args.heuristic:
         estimate_feature_importance = numba_mi(
-            vector_first, vector_second, args.heuristic,
+            vector_first, vector_second, args.heuristic, args.min_support,
         )
 
     elif args.heuristic == 'AMI':

@@ -11,6 +11,7 @@ import pandas as pd
 
 from outrank.algorithms.importance_estimator import rank_features_3MR
 from outrank.core_ranking import estimate_importances_minibatches
+from outrank.core_utils import display_arg_space
 from outrank.core_utils import display_random_tip
 from outrank.core_utils import display_tool_name
 from outrank.core_utils import get_dataset_info
@@ -41,6 +42,7 @@ def outrank_task_conduct_ranking(args: Any):
     if args.silent != 'True':
         display_tool_name()
         display_random_tip()
+        display_arg_space(args)
 
     dataset_info = get_dataset_info(args)
 

@@ -22,6 +22,7 @@ import xxhash
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
+
 pro_tips = [
     'OutRank can construct subfeatures; features based on subspaces. Example command argument is: --subfeature_mapping "feature_a->feature_b;feature_c<->feature_d;feature_c<->feature_e"',
     'Heuristic MI-numba-randomized seems like the best of both worlds! (speed + performance).',
@@ -91,6 +92,10 @@ class BatchRankingSummary:
 
     triplet_scores: list[tuple[str, str, float]]
     step_times: dict[str, Any]
+
+
+def display_arg_space(args: Any) -> None:
+    print('Input parameters: ' + ' | '.join(f'{k}={v}' for k, v in vars(args).items()) + '\n')
 
 
 def display_random_tip() -> None:

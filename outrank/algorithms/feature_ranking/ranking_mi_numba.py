@@ -50,7 +50,7 @@ def compute_conditional_entropy(Y_classes, class_values, class_var_shape, initia
 
 
 @njit(
-    'float32(int32[:], int32[:], int32, int32[:], int32[:], b1)',
+    'float32(int32[:], int32[:], int32, int32[:], int32[:], b1, int32)',
     cache=True,
     parallel=False,
     fastmath=True,
@@ -58,14 +58,13 @@ def compute_conditional_entropy(Y_classes, class_values, class_var_shape, initia
     boundscheck=True,
 )
 def compute_entropies(
-    X, Y, all_events, f_values, f_value_counts, cardinality_correction,
+        X, Y, all_events, f_values, f_value_counts, cardinality_correction, min_support,
 ):
     """Core entropy computation function"""
 
     conditional_entropy = 0.0
     background_cond_entropy = 0.0
     full_entropy = 0.0
-
     class_values, class_counts = numba_unique(Y)
 
     if not cardinality_correction:
@@ -76,10 +75,11 @@ def compute_entropies(
     for f_index in prange(len(f_values)):
         _f_value_counts = f_value_counts[f_index]
 
-        if _f_value_counts == 1:
+        if _f_value_counts < min_support:
             continue
 
         initial_prob = _f_value_counts / all_events
+
         x_value_subspace = np.where(X == f_values[f_index])
 
         Y_classes = Y[x_value_subspace]
@@ -112,14 +112,14 @@ def compute_entropies(
 
 
 @njit(
-    'float32(int32[:], int32[:], float32, b1)',
+    'float32(int32[:], int32[:], float32, b1, int32)',
     cache=True,
     fastmath=True,
     error_model='numpy',
     boundscheck=True,
 )
 def mutual_info_estimator_numba(
-    Y, X, approximation_factor=1, cardinality_correction=False,
+    Y, X, approximation_factor=1, cardinality_correction=False, min_support=2,
 ):
     """Core estimator logic. Compute unique elements, subset if required"""
 
@@ -138,7 +138,7 @@ def mutual_info_estimator_numba(
             Y = Y[subspace]
 
     joint_entropy_core = compute_entropies(
-        X, Y, all_events, f_values, f_value_counts, cardinality_correction,
+        X, Y, all_events, f_values, f_value_counts, cardinality_correction, min_support,
     )
 
     return approximation_factor * joint_entropy_core

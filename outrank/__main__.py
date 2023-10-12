@@ -61,6 +61,12 @@ def main():
         help='A parameter that determines what proportion of vectors is considered for MI computation. 1.0 defaults to full spaces, anything below will result in subsampled spaces. This is used for faster relation estimation (3MR heuristic).',
     )
 
+    parser.add_argument(
+        '--min_support',
+        type=int,
+        default=2,
+        help='Minimal number of occurrences of an item to be considered for entropy calculation - applies to MI-numba-* algorithms.',
+    )
 
     parser.add_argument(
         '--output_folder',
