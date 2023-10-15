@@ -13,6 +13,7 @@ def generate_random_matrix(num_features, size=2000000):
     target = sample[:, 30]
     # Some noise
 
+    sample[:, 31] = target * 19
     target[target < 20] = 0
     return sample, target
 
@@ -62,7 +63,19 @@ if __name__ == '__main__':
         rankings = pd.read_csv(
             os.path.join(args.verify_outputs, 'feature_singles.tsv'), sep='\t',
         )
-        if rankings.iloc[1]['Feature'] != 'f30-(81; 100)':
+
+        # Partial match test
+        if rankings.iloc[2]['Feature'] != 'f31-(90; 100)' and rankings.iloc[2]['Score MI-numba-randomized'] > 0.9:
+            raise Exception(
+                f'Could not retrieve the appropriate second-ranked feature needle in the haystack {rankings.iloc[2].Feature}, exiting',
+            )
+        else:
+            logger.info(
+                f'Identified the appropriate second-ranked feature in the haystack ({rankings.iloc[1].Feature})',
+            )
+
+        # Test of direct retrievals
+        if rankings.iloc[1]['Feature'] != 'f30-(81; 100)' and rankings.iloc[2]['Score MI-numba-randomized'] > 0.99:
             raise Exception(
                 f'Could not retrieve the appropriate feature needle in the haystack {rankings.iloc[1].Feature}, exiting',
             )
