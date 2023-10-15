@@ -14,11 +14,14 @@ then
     python generator_naive.py --output_df_name dataset_naive --num_features 100 --size 10000;
 
     # Substantial subsampling must retrieve the needle.
-    outrank --data_path dataset_naive --data_source csv-raw --subsampling 1 --task all --heuristic MI-numba-randomized --target_ranking_only True --interaction_order 1 --output_folder ./ranking_outputs --minibatch_size 20000;
+    outrank --data_path dataset_naive --data_source csv-raw --subsampling 1 --task all --heuristic MI-numba-randomized --target_ranking_only False --interaction_order 1 --output_folder ./ranking_outputs --minibatch_size 20000;
 
     python generator_naive.py --verify_outputs ranking_outputs;
 
     rm -r ranking_outputs dataset_naive;
+
+    python generator_naive.py --output_df_name dataset_naive --num_features 100 --size 10000;
+
     exit
 fi
 ###################################################################

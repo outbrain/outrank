@@ -64,6 +64,10 @@ if __name__ == '__main__':
             os.path.join(args.verify_outputs, 'feature_singles.tsv'), sep='\t',
         )
 
+        rankings_pairwise = pd.read_csv(
+            os.path.join(args.verify_outputs, 'pairwise_ranks.tsv'), sep='\t',
+        )
+
         # Partial match test
         if rankings.iloc[2]['Feature'] != 'f31-(90; 100)' and rankings.iloc[2]['Score MI-numba-randomized'] > 0.9:
             raise Exception(
@@ -83,3 +87,17 @@ if __name__ == '__main__':
             logger.info(
                 f'Identified the appropriate feature in the haystack ({rankings.iloc[1].Feature})',
             )
+
+
+        # Tests related to pairwise rankings
+        sorted_by_scores = rankings_pairwise.sort_values(by=['Score', 'FeatureA'])
+
+        if len(sorted_by_scores) < 10000:
+            Exception('Number of pairwise comparisons insufficient!')
+        else:
+            logger.info('Found enough pairwise comparisons ..')
+
+        if sorted_by_scores.iloc[-1]['FeatureA'] == 'f45-(90; 100)' and sorted_by_scores.iloc[-1]['FeatureB'] == 'f45-(90; 100)' and sorted_by_scores.iloc[-1]['Score'] > 1.0:
+            logger.info('Similarity check passed for f45 ..')
+        else:
+            raise Exception('Most similar features not identified ..')
