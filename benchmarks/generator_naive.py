@@ -93,7 +93,7 @@ if __name__ == '__main__':
         sorted_by_scores = rankings_pairwise.sort_values(by=['Score', 'FeatureA'])
 
         if len(sorted_by_scores) < 10000:
-            Exception('Number of pairwise comparisons insufficient!')
+            raise Exception('Number of pairwise comparisons insufficient!')
         else:
             logger.info('Found enough pairwise comparisons ..')
 
