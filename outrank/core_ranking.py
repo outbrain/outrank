@@ -63,7 +63,7 @@ def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) ->
 def get_combinations_from_columns(all_columns: pd.Index, args: Any) -> list[tuple[Any, ...]]:
     if '3mr' in args.heuristic:
         rel_columns = [column for column in all_columns if ' AND_REL ' in column]
-        non_rel_columns = list(set(all_columns) - set(rel_columns))
+        non_rel_columns = sorted(set(all_columns) - set(rel_columns))
 
         combinations = list(
             itertools.combinations_with_replacement(non_rel_columns, 2),
