@@ -61,6 +61,8 @@ def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) ->
 
 
 def get_combinations_from_columns(all_columns: pd.Index, args: Any) -> list[tuple[Any, ...]]:
+    """Return feature-feature & feature-label combinations, depending on the heuristic and ranking scope"""
+
     if '3mr' in args.heuristic:
         rel_columns = [column for column in all_columns if ' AND_REL ' in column]
         non_rel_columns = sorted(set(all_columns) - set(rel_columns))
