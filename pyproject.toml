@@ -1,0 +1,4 @@
+[tool.autopep8]
+in-place = true
+list-fixes = true
+ignore = "W690"
