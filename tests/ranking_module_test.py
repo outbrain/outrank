@@ -94,21 +94,24 @@ class CompareStrategiesTest(unittest.TestCase):
 
     def test_get_combinations_from_columns_target_ranking_only(self):
         all_columns = pd.Index(['a', 'b', 'label'])
+        args.heuristic = 'MI-numba-randomized'
+        args.target_ranking_only = 'True'
         combinations = get_combinations_from_columns(all_columns, args)
 
-        self.assertListEqual(
-            sorted(set(combinations)),
-            sorted({('a', 'label'), ('b', 'label'), ('label', 'label')}),
+        self.assertSetEqual(
+            set(combinations),
+            {('a', 'label'), ('b', 'label'), ('label', 'label')},
         )
 
     def test_get_combinations_from_columns(self):
         all_columns = pd.Index(['a', 'b', 'label'])
+        args.heuristic = 'MI-numba-randomized'
         args.target_ranking_only = 'False'
         combinations = get_combinations_from_columns(all_columns, args)
 
-        self.assertListEqual(
-            sorted(set(combinations)),
-            sorted({('a', 'a'), ('b', 'b'), ('label', 'label'), ('a', 'b'), ('a', 'label'), ('b', 'label')}),
+        self.assertSetEqual(
+            set(combinations),
+            {('a', 'a'), ('b', 'b'), ('label', 'label'), ('a', 'b'), ('a', 'label'), ('b', 'label')},
         )
 
     def test_get_combinations_from_columns_3mr(self):
@@ -116,9 +119,9 @@ class CompareStrategiesTest(unittest.TestCase):
         args.heuristic = 'MI-numba-3mr'
         combinations = get_combinations_from_columns(all_columns, args)
 
-        self.assertListEqual(
-            sorted(set(combinations)),
-            sorted({('a', 'a'), ('b', 'b'), ('label', 'label'), ('a', 'b'), ('a', 'label'), ('b', 'label')}),
+        self.assertSetEqual(
+            set(combinations),
+            {('a', 'a'), ('b', 'b'), ('label', 'label'), ('a', 'b'), ('a', 'label'), ('b', 'label')},
         )
 
 

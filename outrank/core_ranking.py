@@ -77,6 +77,7 @@ def get_combinations_from_columns(all_columns: pd.Index, args: Any) -> list[tupl
             combinations = [x for x in _combinations if args.label_column in x]
         else:
             combinations = list(_combinations)
+
     if args.target_ranking_only != 'True':
         # Diagonal elements (non-label)
         combinations += [
