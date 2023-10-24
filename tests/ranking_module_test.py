@@ -113,7 +113,7 @@ class CompareStrategiesTest(unittest.TestCase):
 
     def test_get_combinations_from_columns_3mr(self):
         all_columns = pd.Index(['a', 'b', 'label'])
-        args.heuristic = '3mr'
+        args.heuristic = 'MI-numba-3mr'
         combinations = get_combinations_from_columns(all_columns, args)
 
         self.assertListEqual(
