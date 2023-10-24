@@ -43,6 +43,7 @@ GLOBAL_PRIOR_COMB_COUNTS: dict[Any, int] = Counter()
 IGNORED_VALUES = set()
 HYPERLL_ERROR_BOUND = 0.02
 
+
 def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) -> list[tuple[Any, ...]]:
     """Make sure only relevant subspace of combinations is selected based on prior counts"""
 
@@ -57,6 +58,33 @@ def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) ->
         GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
 
     return tmp
+
+
+def get_combinations_from_columns(all_columns: pd.Index, args: Any) -> list[tuple[Any, ...]]:
+    if '3mr' in args.heuristic:
+        rel_columns = [column for column in all_columns if ' AND_REL ' in column]
+        non_rel_columns = list(set(all_columns) - set(rel_columns))
+
+        combinations = list(
+            itertools.combinations_with_replacement(non_rel_columns, 2),
+        )
+        combinations += [(column, args.label_column) for column in rel_columns]
+    else:
+        _combinations = itertools.combinations_with_replacement(all_columns, 2)
+
+        # Some applications do not require the full feature-feature triangular matrix
+        if args.target_ranking_only == 'True':
+            combinations = [x for x in _combinations if args.label_column in x]
+        else:
+            combinations = list(_combinations)
+    if args.target_ranking_only != 'True':
+        # Diagonal elements (non-label)
+        combinations += [
+            (individual_column, individual_column)
+            for individual_column in all_columns
+            if individual_column != args.label_column
+        ]
+    return combinations
 
 
 def mixed_rank_graph(
@@ -78,31 +106,7 @@ def mixed_rank_graph(
     end_enc_timer = timer()
     out_time_struct['encoding_columns'] = end_enc_timer - start_enc_timer
 
-    if '3mr' in args.heuristic:
-        rel_columns = [column for column in all_columns if ' AND_REL ' in column]
-        non_rel_columns = list(set(all_columns) - set(rel_columns))
-
-        combinations = list(
-            itertools.combinations_with_replacement(non_rel_columns, 2),
-        )
-        combinations += [(column, args.label_column) for column in rel_columns]
-    else:
-        _combinations = itertools.combinations_with_replacement(all_columns, 2)
-
-        # Some applications do not require the full feature-feature triangular matrix
-        if args.target_ranking_only == 'True':
-            combinations = [x for x in _combinations if args.label_column in x]
-        else:
-            combinations = list(_combinations)
-
-    if args.target_ranking_only != 'True':
-        # Diagonal elements (non-label)
-        combinations += [
-            (individual_column, individual_column)
-            for individual_column in all_columns
-            if individual_column != args.label_column
-        ]
-
+    combinations = get_combinations_from_columns(all_columns, args)
     combinations = prior_combinations_sample(combinations, args)
     random.shuffle(combinations)
 

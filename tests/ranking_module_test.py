@@ -10,6 +10,7 @@ import tqdm
 from pathos.multiprocessing import ProcessingPool as Pool
 
 from outrank.core_ranking import compute_combined_features
+from outrank.core_ranking import get_combinations_from_columns
 from outrank.core_ranking import mixed_rank_graph
 from outrank.feature_transformations.feature_transformer_vault import (
     default_transformers,
@@ -29,7 +30,7 @@ test_files_path = 'tests/tests_files'
 class args:
     label_column: str = 'label'
     heuristic: str = 'surrogate-LR'
-    target_ranking_only: bool = True
+    target_ranking_only: str = 'True'
     interaction_order: int = 3
     combination_number_upper_bound: int = 1024
 
@@ -90,6 +91,35 @@ class CompareStrategiesTest(unittest.TestCase):
             random_df, None, args, local_pbar,
         )
         self.assertEqual(transformed_df.shape[1], 6)
+
+    def test_get_combinations_from_columns_target_ranking_only(self):
+        all_columns = pd.Index(['a', 'b', 'label'])
+        combinations = get_combinations_from_columns(all_columns, args)
+
+        self.assertListEqual(
+            sorted(set(combinations)),
+            sorted({('a', 'label'), ('b', 'label'), ('label', 'label')}),
+        )
+
+    def test_get_combinations_from_columns(self):
+        all_columns = pd.Index(['a', 'b', 'label'])
+        args.target_ranking_only = 'False'
+        combinations = get_combinations_from_columns(all_columns, args)
+
+        self.assertListEqual(
+            sorted(set(combinations)),
+            sorted({('a', 'a'), ('b', 'b'), ('label', 'label'), ('a', 'b'), ('a', 'label'), ('b', 'label')}),
+        )
+
+    def test_get_combinations_from_columns_3mr(self):
+        all_columns = pd.Index(['a', 'b', 'label'])
+        args.heuristic = '3mr'
+        combinations = get_combinations_from_columns(all_columns, args)
+
+        self.assertListEqual(
+            sorted(set(combinations)),
+            sorted({('a', 'a'), ('b', 'b'), ('label', 'label'), ('a', 'b'), ('a', 'label'), ('b', 'label')}),
+        )
 
 
 if __name__ == '__main__':
