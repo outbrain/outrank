@@ -39,7 +39,7 @@ logger.setLevel(logging.DEBUG)
 random.seed(a=123, version=2)
 GLOBAL_CARDINALITY_STORAGE: dict[Any, Any] = dict()
 GLOBAL_RARE_VALUE_STORAGE: dict[str, Any] = Counter()
-GLOBAL_PRIOR_COMB_COUNTS: dict[Any, int] = Counter()
+GLOBAL_PRIOR_COMB_COUNTS: Counter[Any] = Counter()
 IGNORED_VALUES = set()
 HYPERLL_ERROR_BOUND = 0.02
 
@@ -49,13 +49,13 @@ def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) ->
 
     if len(GLOBAL_PRIOR_COMB_COUNTS) == 0:
         for combination in combinations:
-            GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
+            GLOBAL_PRIOR_COMB_COUNTS[combination] -= 1
         tmp = combinations[:args.combination_number_upper_bound]
     else:
-        tmp = list(x[0] for x in sorted(GLOBAL_PRIOR_COMB_COUNTS.items(), key=lambda x:x[1], reverse=False))[:args.combination_number_upper_bound]
+        tmp = [x[0] for x in GLOBAL_PRIOR_COMB_COUNTS.most_common(n=args.combination_number_upper_bound)]
 
     for combination in tmp:
-        GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
+        GLOBAL_PRIOR_COMB_COUNTS[combination] -= 1
 
     return tmp
 
