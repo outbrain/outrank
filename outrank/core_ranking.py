@@ -38,7 +38,7 @@ logger = logging.getLogger('syn-logger')
 logger.setLevel(logging.DEBUG)
 random.seed(a=123, version=2)
 GLOBAL_CARDINALITY_STORAGE: dict[Any, Any] = dict()
-GLOBAL_RARE_VALUE_STORAGE: dict[str, Any] = Counter()
+GLOBAL_RARE_VALUE_STORAGE: Counter[Any] = Counter()
 GLOBAL_PRIOR_COMB_COUNTS: Counter[Any] = Counter()
 IGNORED_VALUES = set()
 HYPERLL_ERROR_BOUND = 0.02
@@ -402,7 +402,7 @@ def compute_value_counts(input_dataframe: pd.DataFrame, args: Any):
         main_values = input_dataframe[column].values
         for value in main_values:
             if value not in IGNORED_VALUES:
-                GLOBAL_RARE_VALUE_STORAGE.update({(column, value): 1})
+                GLOBAL_RARE_VALUE_STORAGE[(column, value)] += 1
 
     for key, val in GLOBAL_RARE_VALUE_STORAGE.items():
         if val > args.rare_value_count_upper_bound:
