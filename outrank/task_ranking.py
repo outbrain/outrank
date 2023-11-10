@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import glob
+import json
 import logging
 import os
 import signal
@@ -100,6 +101,7 @@ def outrank_task_conduct_ranking(args: Any):
                     memory_object_storage,
                     coverage_object,
                     RARE_VALUE_STORAGE,
+                    GLOBAL_PRIOR_COMB_COUNTS,
                 ) = estimate_importances_minibatches(**cmd_arguments)
 
             global_bounds_storage += bounds_object_storage
@@ -275,6 +277,10 @@ def outrank_task_conduct_ranking(args: Any):
     triplets.to_csv(
         os.path.join(args.output_folder, 'pairwise_ranks.tsv'), sep='\t', index=False,
     )
+
+    with open(f'{args.output_folder}/combination_estimation_counts.json', 'w') as out_counts:
+        out_dict = {str(k): v for k, v in GLOBAL_PRIOR_COMB_COUNTS.items()}
+        out_counts.write(json.dumps(out_dict))
 
     # Write timings and config for replicability
     dfx = pd.DataFrame(all_timings)
