@@ -33,3 +33,34 @@ outrank --help
 * A minimal showcase of performing feature ranking on a generic CSV is demonstrated with [this example](https://github.com/outbrain/outrank/tree/main/scripts/run_minimal.sh).
 
 * [More examples](https://github.com/outbrain/outrank/tree/main/examples) demonstrating OutRank's capabilities are also available.
+
+
+# OutRank as a Python library
+Once installed, _OutRank_ can be used as any other Python library. For example, generic feature ranking algorithms can be accessed as
+
+```python
+from outrank.algorithms.feature_ranking.ranking_mi_numba import (
+    mutual_info_estimator_numba,
+)
+
+# Some synthetic minimal data (Numpy vectors)
+a = np.array([1, 0, 0, 0, 1, 1, 1, 0], dtype=np.int32)
+
+lowest = np.array(np.random.permutation(a), dtype=np.int32)
+medium = np.array([1, 1, 0, 0, 1, 1, 1, 1], dtype=np.int32)
+high = np.array([1, 0, 0, 0, 1, 1, 1, 1], dtype=np.int32)
+
+lowest_score = mutual_info_estimator_numba(
+	a, lowest, np.float32(1.0), False,
+)
+medium_score = mutual_info_estimator_numba(
+	a, medium, np.float32(1.0), False,
+)
+high_score = mutual_info_estimator_numba(
+	a, high, np.float32(1.0), False,
+)
+
+scores = [lowest_score, medium_score, high_score]
+sorted_score_indices = np.argsort(scores)
+assert np.sum(np.array([0, 1, 2]) - sorted_score_indices) ==  0
+```

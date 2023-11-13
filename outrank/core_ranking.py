@@ -42,6 +42,7 @@ GLOBAL_RARE_VALUE_STORAGE: dict[str, Any] = Counter()
 GLOBAL_PRIOR_COMB_COUNTS: dict[Any, int] = Counter()
 IGNORED_VALUES = set()
 HYPERLL_ERROR_BOUND = 0.02
+MAX_FEATURES_3MR = 10 ** 4
 
 
 def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) -> list[tuple[Any, ...]]:
@@ -64,6 +65,8 @@ def get_combinations_from_columns(all_columns: pd.Index, args: Any) -> list[tupl
     """Return feature-feature & feature-label combinations, depending on the heuristic and ranking scope"""
 
     if '3mr' in args.heuristic:
+        if args.combination_number_upper_bound > MAX_FEATURES_3MR:
+            args.combination_number_upper_bound = MAX_FEATURES_3MR
         rel_columns = [column for column in all_columns if ' AND_REL ' in column]
         non_rel_columns = sorted(set(all_columns) - set(rel_columns))
 
@@ -606,7 +609,7 @@ def estimate_importances_minibatches(
     delimiter: str = '\t',
     feature_construction_mode: bool = False,
     logger: Any = None,
-) -> tuple[list[dict[str, Any]], Any, dict[Any, Any], list[dict[str, Any]], list[dict[str, set[str]]], defaultdict[str, list[set[str]]], dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], Any, dict[Any, Any], list[dict[str, Any]], list[dict[str, set[str]]], defaultdict[str, list[set[str]]], dict[str, Any], dict[str, Any]]:
     """Interaction score estimator - suitable for example for csv-like input data types.
     This type of data is normally a single large csv, meaning that minibatch processing needs to
     happen during incremental handling of the file (that"s not the case for pre-separated ob data)
@@ -729,9 +732,10 @@ def estimate_importances_minibatches(
     return (
         step_timing_checkpoints,
         get_grouped_df(importances_df),
-        GLOBAL_CARDINALITY_STORAGE,
+        GLOBAL_CARDINALITY_STORAGE.copy(),
         bounds_storage_batch,
         memory_storage_batch,
         local_coverage_object,
-        GLOBAL_RARE_VALUE_STORAGE,
+        GLOBAL_RARE_VALUE_STORAGE.copy(),
+        GLOBAL_PRIOR_COMB_COUNTS.copy(),
     )
