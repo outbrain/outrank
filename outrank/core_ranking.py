@@ -732,10 +732,10 @@ def estimate_importances_minibatches(
     return (
         step_timing_checkpoints,
         get_grouped_df(importances_df),
-        GLOBAL_CARDINALITY_STORAGE,
+        GLOBAL_CARDINALITY_STORAGE.copy(),
         bounds_storage_batch,
         memory_storage_batch,
         local_coverage_object,
-        GLOBAL_RARE_VALUE_STORAGE,
-        GLOBAL_PRIOR_COMB_COUNTS,
+        GLOBAL_RARE_VALUE_STORAGE.copy(),
+        GLOBAL_PRIOR_COMB_COUNTS.copy(),
     )
