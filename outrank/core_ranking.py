@@ -415,7 +415,7 @@ def compute_value_counts(input_dataframe: pd.DataFrame, args: Any):
         del GLOBAL_RARE_VALUE_STORAGE[to_remove_val]
 
 
-def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any, args: Any) -> None:
+def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any) -> None:
     """Compute cardinalities of features, incrementally"""
 
     global GLOBAL_CARDINALITY_STORAGE
@@ -542,7 +542,7 @@ def compute_batch_ranking(
     feature_memory_consumption = compute_feature_memory_consumption(
         input_dataframe, args,
     )
-    compute_cardinalities(input_dataframe, pbar, args)
+    compute_cardinalities(input_dataframe, pbar)
 
     if args.task == 'identify_rare_values':
         compute_value_counts(input_dataframe, args)
