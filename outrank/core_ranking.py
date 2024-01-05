@@ -432,6 +432,7 @@ def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any) -> None:
                 GLOBAL_CARDINALITY_STORAGE[column].add(
                     internal_hash(unique_value),
                 )
+
         pbar.set_description(
             f'Computing cardinality (Hyperloglog update) {enx}/{input_dataframe.shape[1]}',
         )
@@ -498,6 +499,7 @@ def compute_batch_ranking(
         input_dataframe = input_dataframe[list(focus_set)]
 
     if args.transformers != 'none':
+
         pbar.set_description('Adding transformations')
         input_dataframe = enrich_with_transformations(
             input_dataframe, numeric_column_types, logger, args,
@@ -628,7 +630,7 @@ def estimate_importances_minibatches(
 
     local_coverage_object = defaultdict(list)
     local_pbar = tqdm.tqdm(
-        total=get_num_of_instances(input_file) - 1, position=0,
+        total=get_num_of_instances(input_file) - 1, position=0, disable=args.disable_tqdm == 'True',
     )
 
     file_name, file_extension = os.path.splitext(input_file)

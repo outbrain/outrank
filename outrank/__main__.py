@@ -184,13 +184,6 @@ def main():
     )
 
     parser.add_argument(
-        '--silent',
-        type=str,
-        default='False',
-        help='Suppress the logo and tips.',
-    )
-
-    parser.add_argument(
         '--subfeature_mapping',
         type=str,
         default='False',
@@ -224,6 +217,14 @@ def main():
         default='test_data_synthetic',
         help='Relevant for task data_generator -- name of the folder that contains generated data.',
     )
+
+    parser.add_argument(
+        '--disable_tqdm',
+        default='False',
+        choices=['False', 'True'],
+        help='Either True or False.',
+    )
+
 
     args = parser.parse_args()
 

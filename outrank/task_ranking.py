@@ -32,14 +32,12 @@ except Exception as es:
     )
 
 
-def outrank_task_conduct_ranking(args: Any):
+def outrank_task_conduct_ranking(args: Any) -> None:
     # Data source = folder structure + relevant file specifications
-
-    # No need for full-blown ranking in this case
     if args.task in ['identify_rare_values', 'feature_summary_transformers']:
         args.heuristic = 'Constant'
 
-    if args.silent != 'True':
+    if args.disable_tqdm == 'False':
         display_tool_name()
         display_random_tip()
 
