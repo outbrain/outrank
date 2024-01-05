@@ -33,6 +33,7 @@ class args:
     target_ranking_only: str = 'True'
     interaction_order: int = 3
     combination_number_upper_bound: int = 1024
+    verbosity_level: int = 1
 
 
 class CompareStrategiesTest(unittest.TestCase):
