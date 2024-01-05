@@ -219,10 +219,10 @@ def main():
     )
 
     parser.add_argument(
-        '--verbosity_level',
-        type=int,
-        default=1,
-        help='Either 0 or 1.',
+        '--disable_tqdm',
+        default='False',
+        choices=['False', 'True'],
+        help='Either True or False.',
     )
 
 

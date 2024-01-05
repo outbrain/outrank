@@ -37,7 +37,7 @@ def outrank_task_conduct_ranking(args: Any) -> None:
     if args.task in ['identify_rare_values', 'feature_summary_transformers']:
         args.heuristic = 'Constant'
 
-    if args.verbosity_level > 0:
+    if args.disable_tqdm == 'False':
         display_tool_name()
         display_random_tip()
 
