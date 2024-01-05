@@ -105,7 +105,8 @@ def mixed_rank_graph(
     out_time_struct = {}
 
     # Handle cont. types prior to interaction evaluation
-    pbar.set_description('Encoding columns')
+    if args.verbosity_level > 0:
+        pbar.set_description('Encoding columns')
     start_enc_timer = timer()
     tmp_df = pd.DataFrame({k : tmp_df[k].cat.codes for k in all_columns})
 
@@ -126,7 +127,8 @@ def mixed_rank_graph(
         return BatchRankingSummary(final_constant_imp, out_time_struct)
 
     # Map the scoring calls to the worker pool
-    pbar.set_description('Allocating thread pool')
+    if args.verbosity_level > 0:
+        pbar.set_description('Allocating thread pool')
 
     # starmap is an alternative that is slower unfortunately (but nicer)
     def get_grounded_importances_estimate(combination: tuple[str]) -> Any:
@@ -134,7 +136,8 @@ def mixed_rank_graph(
 
     start_enc_timer = timer()
     with cpu_pool as p:
-        pbar.set_description(f'Computing (#ftr={len(combinations)})')
+        if args.verbosity_level > 0:
+            pbar.set_description(f'Computing (#ftr={len(combinations)})')
         results = p.amap(get_grounded_importances_estimate, combinations)
         while not results.ready():
             time.sleep(4)
@@ -144,7 +147,8 @@ def mixed_rank_graph(
         start_enc_timer
 
     # Gather the final triplets
-    pbar.set_description('Aggregation of ranking results')
+    if args.verbosity_level > 0:
+        pbar.set_description('Aggregation of ranking results')
     final_triplets = []
     for triplet in triplets:
         inv = (triplet[1], triplet[0], triplet[2])
@@ -152,7 +156,8 @@ def mixed_rank_graph(
         final_triplets.append(triplet)
         triplets = final_triplets
 
-    pbar.set_description('Proceeding to the next batch of data')
+    if args.verbosity_level > 0:
+        pbar.set_description('Proceeding to the next batch of data')
     return BatchRankingSummary(triplets, out_time_struct)
 
 
@@ -200,9 +205,10 @@ def compute_combined_features(
     com_counter = 0
     new_feature_hash = {}
     for new_combination in full_combination_space:
-        pbar.set_description(
-            f'Created {com_counter}/{len(full_combination_space)}',
-        )
+        if args.verbosity_level > 0:
+            pbar.set_description(
+                f'Created {com_counter}/{len(full_combination_space)}',
+            )
         combined_feature: list[str] = [str(0)] * input_dataframe.shape[0]
         for feature in new_combination:
             tmp_feature = input_dataframe[feature].tolist()
@@ -216,7 +222,8 @@ def compute_combined_features(
         new_feature_hash[ftr_name] = combined_feature
         com_counter += 1
     tmp_df = pd.DataFrame(new_feature_hash)
-    pbar.set_description('Concatenating into final frame ..')
+    if args.verbosity_level > 0:
+        pbar.set_description('Concatenating into final frame ..')
     input_dataframe = pd.concat([input_dataframe, tmp_df], axis=1)
     del tmp_df
 
@@ -415,7 +422,7 @@ def compute_value_counts(input_dataframe: pd.DataFrame, args: Any):
         del GLOBAL_RARE_VALUE_STORAGE[to_remove_val]
 
 
-def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any) -> None:
+def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any, args: Any) -> None:
     """Compute cardinalities of features, incrementally"""
 
     global GLOBAL_CARDINALITY_STORAGE
@@ -432,9 +439,10 @@ def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any) -> None:
                 GLOBAL_CARDINALITY_STORAGE[column].add(
                     internal_hash(unique_value),
                 )
-        pbar.set_description(
-            f'Computing cardinality (Hyperloglog update) {enx}/{input_dataframe.shape[1]}',
-        )
+        if args.verbosity_level > 0:
+            pbar.set_description(
+                f'Computing cardinality (Hyperloglog update) {enx}/{input_dataframe.shape[1]}',
+            )
 
 
 def compute_bounds_increment(
@@ -482,7 +490,8 @@ def compute_batch_ranking(
 
     input_dataframe = pd.DataFrame(line_tmp_storage)
     input_dataframe.columns = column_descriptions
-    pbar.set_description('Control features')
+    if args.verbosity_level > 0:
+        pbar.set_description('Control features')
 
     if args.feature_set_focus:
         if args.feature_set_focus == '_all_from_reference_JSON':
@@ -498,49 +507,56 @@ def compute_batch_ranking(
         input_dataframe = input_dataframe[list(focus_set)]
 
     if args.transformers != 'none':
-        pbar.set_description('Adding transformations')
+        if args.verbosity_level > 0:
+            pbar.set_description('Adding transformations')
         input_dataframe = enrich_with_transformations(
             input_dataframe, numeric_column_types, logger, args,
         )
 
     if args.explode_multivalue_features != 'False':
-        pbar.set_description('Constructing new features from multivalue ones')
+        if args.verbosity_level > 0:
+            pbar.set_description('Constructing new features from multivalue ones')
         input_dataframe = compute_expanded_multivalue_features(
             input_dataframe, logger, args, pbar,
         )
 
     if args.subfeature_mapping != 'False':
-        pbar.set_description('Constructing new (sub)features')
+        if args.verbosity_level > 0:
+            pbar.set_description('Constructing new (sub)features')
         input_dataframe = compute_subfeatures(
             input_dataframe, logger, args, pbar,
         )
 
     if args.interaction_order > 1:
-        pbar.set_description('Constructing new features')
+        if args.verbosity_level > 0:
+            pbar.set_description('Constructing new features')
         input_dataframe = compute_combined_features(
             input_dataframe, logger, args, pbar,
         )
 
     # in case of 3mr we compute the score of combinations against the target
     if '3mr' in args.heuristic:
-        pbar.set_description(
-            'Constructing features for computing relations in 3mr',
-        )
+        if args.verbosity_level > 0:
+            pbar.set_description(
+                'Constructing features for computing relations in 3mr',
+            )
         input_dataframe = compute_combined_features(
             input_dataframe, logger, args, pbar, True,
         )
 
     if args.include_noise_baseline_features == 'True' and args.heuristic != 'Constant':
-        pbar.set_description('Computing baseline features')
+        if args.verbosity_level > 0:
+            pbar.set_description('Computing baseline features')
         input_dataframe = include_noisy_features(input_dataframe, logger, args)
 
     # Compute incremental statistic useful for data inspection/transformer generation
-    pbar.set_description('Computing coverage')
+    if args.verbosity_level > 0:
+        pbar.set_description('Computing coverage')
     coverage_storage = compute_coverage(input_dataframe, args)
     feature_memory_consumption = compute_feature_memory_consumption(
         input_dataframe, args,
     )
-    compute_cardinalities(input_dataframe, pbar)
+    compute_cardinalities(input_dataframe, pbar, args)
 
     if args.task == 'identify_rare_values':
         compute_value_counts(input_dataframe, args)
@@ -548,10 +564,10 @@ def compute_batch_ranking(
     bounds_storage = compute_bounds_increment(
         input_dataframe, numeric_column_types,
     )
-
-    pbar.set_description(
-        f'Computing ranks for {input_dataframe.shape[1]} features',
-    )
+    if args.verbosity_level > 0:
+        pbar.set_description(
+            f'Computing ranks for {input_dataframe.shape[1]} features',
+        )
 
     return (
         mixed_rank_graph(input_dataframe, args, cpu_pool, pbar),
@@ -627,9 +643,12 @@ def estimate_importances_minibatches(
     step_timing_checkpoints = []
 
     local_coverage_object = defaultdict(list)
-    local_pbar = tqdm.tqdm(
-        total=get_num_of_instances(input_file) - 1, position=0,
-    )
+    if args.verbosity_level > 0:
+        local_pbar = tqdm.tqdm(
+            total=get_num_of_instances(input_file) - 1, position=0,
+        )
+    else:
+        local_pbar = None
 
     file_name, file_extension = os.path.splitext(input_file)
 
@@ -641,10 +660,12 @@ def estimate_importances_minibatches(
 
     file_stream.readline()
 
-    local_pbar.set_description('Starting ranking computation')
+    if args.verbosity_level > 0:
+        local_pbar.set_description('Starting ranking computation')
     for line in file_stream:
         line_counter += 1
-        local_pbar.update(1)
+        if args.verbosity_level > 0:
+            local_pbar.update(1)
 
         if line_counter % args.subsampling != 0:
             continue
@@ -685,12 +706,14 @@ def estimate_importances_minibatches(
             importances_df += importances_batch.triplet_scores
 
             if args.heuristic != 'Constant':
-                local_pbar.set_description('Creating checkpoint')
+                if args.verbosity_level > 0:
+                    local_pbar.set_description('Creating checkpoint')
                 checkpoint_importances_df(importances_df)
 
     file_stream.close()
 
-    local_pbar.set_description('Parsing the remainder')
+    if args.verbosity_level > 0:
+        local_pbar.set_description('Parsing the remainder')
     if invalid_lines > 0:
         logger.info(
             f"Detected {invalid_lines} invalid lines. If this number is very high, it's possible your header is off - re-check your data/attribute-feature mappings please!",
@@ -726,8 +749,9 @@ def estimate_importances_minibatches(
         bounds_storage_batch.append(bounds_storage)
         checkpoint_importances_df(importances_df)
 
-    local_pbar.set_description('Wrapping up')
-    local_pbar.close()
+    if args.verbosity_level > 0:
+        local_pbar.set_description('Wrapping up')
+        local_pbar.close()
 
     return (
         step_timing_checkpoints,
