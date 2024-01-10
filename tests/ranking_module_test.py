@@ -34,6 +34,7 @@ class args:
     interaction_order: int = 3
     combination_number_upper_bound: int = 1024
     disable_tqdm: bool = False
+    mi_stratified_sampling_ratio: float = 1.0
 
 
 class CompareStrategiesTest(unittest.TestCase):
