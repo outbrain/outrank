@@ -49,7 +49,7 @@ def main():
     parser.add_argument(
         '--minibatch_size',
         type=int,
-        default=2**13,
+        default=2**14,
         help='Suitable for data, not pre-split to batches, this parameter determines batch size - note that too large batch size can slow down the multithreaded score computation due to many thread allocations etc. This works ok for <300 features and up to 48 threads.',
     )
 
@@ -223,6 +223,13 @@ def main():
         default='False',
         choices=['False', 'True'],
         help='Either True or False.',
+    )
+
+    parser.add_argument(
+        '--mi_stratified_sampling_ratio',
+        type=float,
+        default=1.0,
+        help='If < 1.0, MI algorithm will further subsample data in stratified manner (equal distributions per value if possible).',
     )
 
 
