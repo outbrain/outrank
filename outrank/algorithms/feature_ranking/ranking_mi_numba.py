@@ -115,40 +115,6 @@ def compute_entropies(
         return core_joint_entropy
 
 
-# @njit(
-#     'Tuple((int32[:], int32[:]))(int32[:], int32[:], float32, int32[:], int32[:])'
-# )
-# def stratified_subsampling(Y, X, approximation_factor, f_values_X, f_value_counts_X):
-#     all_events = len(X)
-#     f_values_Y, f_value_counts_Y = numba_unique(Y)
-
-#     final_space_size = int(approximation_factor * all_events)
-
-#     if final_space_size < 2 ** 8:
-#         return Y, X
-
-#     final_Y = np.empty(final_space_size, dtype=np.int32)
-#     final_X = np.empty(final_space_size, dtype=np.int32)
-#     unique_x_vals = len(f_values_X)
-
-#     if unique_x_vals >= final_space_size:
-#         return Y, X
-#     else:
-#         unique_samples_per_val = int(final_space_size / len(f_values_X))
-
-#     index_offset = 0
-#     for i, fval in enumerate(f_values_X):
-#         count = 0
-
-#         # todo, some randomization ..
-#         for j in range(all_events):
-#             if X[j] == fval and count < unique_samples_per_val and index_offset < final_space_size:
-#                 final_Y[index_offset] = Y[j]
-#                 final_X[index_offset] = X[j]
-#                 index_offset += 1
-#                 count += 1
-
-#     return final_Y, final_X
 @njit(
     'Tuple((int32[:], int32[:]))(int32[:], int32[:], float32, int32[:], int32[:])',
 )
