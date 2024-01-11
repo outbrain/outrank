@@ -121,7 +121,6 @@ def compute_entropies(
 def stratified_subsampling(Y, X, approximation_factor, f_values_X):
 
     all_events = len(X)
-    all_samples = 0
     final_space_size = int(approximation_factor * all_events)
 
     unique_samples_per_val = int(final_space_size / len(f_values_X))
