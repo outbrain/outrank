@@ -116,23 +116,19 @@ def compute_entropies(
 
 
 @njit(
-    'Tuple((int32[:], int32[:]))(int32[:], int32[:], float32, int32[:], int32[:])',
+    'Tuple((int32[:], int32[:]))(int32[:], int32[:], float32, int32[:])',
 )
-def stratified_subsampling(Y, X, approximation_factor, f_values_X, f_value_counts_X):
+def stratified_subsampling(Y, X, approximation_factor, f_values_X):
 
     all_events = len(X)
-    f_values_Y, f_value_counts_Y = numba_unique(Y)
-
     all_samples = 0
     final_space_size = int(approximation_factor * all_events)
-
-    final_Y = np.zeros(final_space_size)
-    final_X = np.zeros(final_space_size)
 
     unique_samples_per_val = int(final_space_size / len(f_values_X))
 
     if unique_samples_per_val == 0:
         return Y, X
+
     final_index_array = np.empty(final_space_size)
 
     index_offset = 0
@@ -171,7 +167,7 @@ def mutual_info_estimator_numba(
         cardinality_correction = False
 
     if approximation_factor < 1.0:
-        Y, X = stratified_subsampling(Y, X, approximation_factor, f_values, f_value_counts)
+        Y, X = stratified_subsampling(Y, X, approximation_factor, f_values)
 
     joint_entropy_core = compute_entropies(
         X, Y, all_events, f_values, f_value_counts, cardinality_correction,
