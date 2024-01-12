@@ -72,7 +72,7 @@ def sklearn_surrogate(
     return estimate_feature_importance
 
 
-def numba_mi(vector_first, vector_second, heuristic):
+def numba_mi(vector_first, vector_second, heuristic, mi_stratified_sampling_ratio):
     if heuristic == 'MI-numba-randomized':
         cardinality_correction = True
 
@@ -82,7 +82,7 @@ def numba_mi(vector_first, vector_second, heuristic):
     estimate_feature_importance = ranking_mi_numba.mutual_info_estimator_numba(
         vector_first.reshape(-1).astype(np.int32),
         vector_second.reshape(-1).astype(np.int32),
-        approximation_factor=np.float32(1.0),
+        approximation_factor=np.float32(mi_stratified_sampling_ratio),
         cardinality_correction=cardinality_correction,
     )
 
@@ -128,7 +128,7 @@ def get_importances_estimate_pairwise(combination, args, tmp_df):
 
     elif 'MI-numba' in args.heuristic:
         estimate_feature_importance = numba_mi(
-            vector_first, vector_second, args.heuristic,
+            vector_first, vector_second, args.heuristic, args.mi_stratified_sampling_ratio,
         )
 
     elif args.heuristic == 'AMI':
