@@ -118,12 +118,12 @@ def compute_entropies(
 @njit(
     'Tuple((int32[:], int32[:]))(int32[:], int32[:], float32, int32[:])',
 )
-def stratified_subsampling(Y, X, approximation_factor, f_values_X):
+def stratified_subsampling(Y, X, approximation_factor, _f_values_X):
 
     all_events = len(X)
     final_space_size = int(approximation_factor * all_events)
 
-    unique_samples_per_val = int(final_space_size / len(f_values_X))
+    unique_samples_per_val = int(final_space_size / len(_f_values_X))
 
     if unique_samples_per_val == 0:
         return Y, X
@@ -131,7 +131,9 @@ def stratified_subsampling(Y, X, approximation_factor, f_values_X):
     final_index_array = np.empty(final_space_size)
 
     index_offset = 0
-    for fval in f_values_X:
+    for fval in _f_values_X:
+
+        # note: this is not randomized due to batch effects, could be an improvement
         x_indices = np.where(X == fval)[0][:unique_samples_per_val]
         x_indices_len = len(x_indices)
         second_offset = (index_offset + x_indices_len)
