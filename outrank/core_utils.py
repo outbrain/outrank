@@ -402,10 +402,10 @@ def extract_features_from_reference_JSON(json_path: str, combined_features_only 
     unique_features = set()
     feature_space = content['desc'].get('features', [])
     fields_space = content['desc'].get('fields', [])
-    joint_space = feature_space + fields_space        
+    joint_space = feature_space + fields_space
 
     if combined_features_only:
-        return set([feature for feature in feature_space if len(feature.split(","))>1])
+        return {feature for feature in feature_space if len(feature.split(','))>1}
 
     for feature_tuple in joint_space:
         for individual_feature in feature_tuple.split(','):
