@@ -524,12 +524,10 @@ def compute_batch_ranking(
         )
 
     if args.interaction_order > 1 or args.reference_model_JSON:
-        print(input_dataframe)
         pbar.set_description('Constructing new features')
         input_dataframe = compute_combined_features(
             input_dataframe, logger, args, pbar,
         )
-        print(input_dataframe)
 
     # in case of 3mr we compute the score of combinations against the target
     if '3mr' in args.heuristic:
