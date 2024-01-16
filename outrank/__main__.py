@@ -165,7 +165,7 @@ def main():
     parser.add_argument(
         '--reference_model_JSON',
         type=str,
-        default='./ranking_outputs/reference_model.json',
+        default='',
         help='Reference model JSON',
     )
 

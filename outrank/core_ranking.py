@@ -187,7 +187,7 @@ def compute_combined_features(
     join_string = ' AND_REL ' if is_3mr else ' AND '
     interaction_order = 2 if is_3mr else args.interaction_order
 
-    if args.reference_model_JSON: 
+    if args.reference_model_JSON != "": 
         combined_features = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only = True)
         full_combination_space = [combination.split(',') for combination in combined_features]
     else:
@@ -195,7 +195,7 @@ def compute_combined_features(
             itertools.combinations(all_columns, interaction_order),
         )
     
-    if args.combination_number_upper_bound and not args.reference_model_JSON:
+    if args.combination_number_upper_bound and args.reference_model_JSON != "":
         random.shuffle(full_combination_space)
         full_combination_space = full_combination_space[
             : args.combination_number_upper_bound
