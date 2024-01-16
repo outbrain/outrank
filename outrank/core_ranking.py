@@ -187,11 +187,15 @@ def compute_combined_features(
     join_string = ' AND_REL ' if is_3mr else ' AND '
     interaction_order = 2 if is_3mr else args.interaction_order
 
-    full_combination_space = list(
-        itertools.combinations(all_columns, interaction_order),
-    )
+    if args.reference_model_JSON != '':
+        combined_features = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only = True)
+        full_combination_space = [combination.split(',') for combination in combined_features]
+    else:
+        full_combination_space = list(
+            itertools.combinations(all_columns, interaction_order),
+        )
 
-    if args.combination_number_upper_bound:
+    if args.combination_number_upper_bound and args.reference_model_JSON != '':
         random.shuffle(full_combination_space)
         full_combination_space = full_combination_space[
             : args.combination_number_upper_bound
@@ -517,7 +521,7 @@ def compute_batch_ranking(
             input_dataframe, logger, args, pbar,
         )
 
-    if args.interaction_order > 1:
+    if args.interaction_order > 1 or args.reference_model_JSON:
         pbar.set_description('Constructing new features')
         input_dataframe = compute_combined_features(
             input_dataframe, logger, args, pbar,

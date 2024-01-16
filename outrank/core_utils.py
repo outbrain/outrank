@@ -393,7 +393,7 @@ def parse_csv_raw(data_path) -> DatasetInformationStorage:
     )
 
 
-def extract_features_from_reference_JSON(json_path: str) -> set[Any]:
+def extract_features_from_reference_JSON(json_path: str, combined_features_only = False) -> set[Any]:
     """Given a model's JSON, extract unique features"""
 
     with open(json_path) as jp:
@@ -403,6 +403,9 @@ def extract_features_from_reference_JSON(json_path: str) -> set[Any]:
     feature_space = content['desc'].get('features', [])
     fields_space = content['desc'].get('fields', [])
     joint_space = feature_space + fields_space
+
+    if combined_features_only:
+        return {feature for feature in feature_space if len(feature.split(','))>1}
 
     for feature_tuple in joint_space:
         for individual_feature in feature_tuple.split(','):
