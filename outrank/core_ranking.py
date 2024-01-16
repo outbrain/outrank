@@ -190,7 +190,6 @@ def compute_combined_features(
     if args.reference_model_JSON: 
         combined_features = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only = True)
         full_combination_space = [combination.split(',') for combination in combined_features]
-        print(full_combination_space)
     else:
         full_combination_space = list(
             itertools.combinations(all_columns, interaction_order),
@@ -501,7 +500,6 @@ def compute_batch_ranking(
 
         focus_set.add(args.label_column)
         focus_set = {x for x in focus_set if x in input_dataframe.columns}
-        print(focus_set)
         input_dataframe = input_dataframe[list(focus_set)]
 
     if args.transformers != 'none':

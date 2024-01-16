@@ -404,7 +404,6 @@ def extract_features_from_reference_JSON(json_path: str, combined_features_only 
     fields_space = content['desc'].get('fields', [])
     joint_space = feature_space + fields_space        
 
-
     if combined_features_only:
         return set([feature for feature in feature_space if len(feature.split(","))>1])
 
