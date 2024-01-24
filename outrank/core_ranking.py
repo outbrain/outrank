@@ -22,6 +22,7 @@ import pandas as pd
 import tqdm
 
 from outrank.algorithms.importance_estimator import get_importances_estimate_pairwise
+from outrank.algorithms.sketches.counting_cms import CountMinSketch
 from outrank.algorithms.sketches.counting_ultiloglog import (
     HyperLogLogWCache as HyperLogLog,
 )
@@ -38,6 +39,7 @@ logger = logging.getLogger('syn-logger')
 logger.setLevel(logging.DEBUG)
 random.seed(a=123, version=2)
 GLOBAL_CARDINALITY_STORAGE: dict[Any, Any] = dict()
+GLOBAL_COUNTS_STORAGE: dict[Any, Any] = dict()
 GLOBAL_RARE_VALUE_STORAGE: dict[str, Any] = Counter()
 GLOBAL_PRIOR_COMB_COUNTS: dict[Any, int] = Counter()
 IGNORED_VALUES = set()
@@ -431,6 +433,11 @@ def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any) -> None:
                 HYPERLL_ERROR_BOUND,
             )
 
+        if column not in GLOBAL_COUNTS_STORAGE:
+            GLOBAL_COUNTS_STORAGE[column] = CountMinSketch()
+
+        [GLOBAL_COUNTS_STORAGE[column].add(value) for value in input_dataframe[column].values]
+
         for unique_value in set(input_dataframe[column].unique()):
             if unique_value:
                 GLOBAL_CARDINALITY_STORAGE[column].add(
@@ -615,7 +622,7 @@ def estimate_importances_minibatches(
     delimiter: str = '\t',
     feature_construction_mode: bool = False,
     logger: Any = None,
-) -> tuple[list[dict[str, Any]], Any, dict[Any, Any], list[dict[str, Any]], list[dict[str, set[str]]], defaultdict[str, list[set[str]]], dict[str, Any], dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], Any, dict[Any, Any], list[dict[str, Any]], list[dict[str, set[str]]], defaultdict[str, list[set[str]]], dict[str, Any], dict[str, Any], dict[str, Any]]:
     """Interaction score estimator - suitable for example for csv-like input data types.
     This type of data is normally a single large csv, meaning that minibatch processing needs to
     happen during incremental handling of the file (that"s not the case for pre-separated ob data)
@@ -744,4 +751,5 @@ def estimate_importances_minibatches(
         local_coverage_object,
         GLOBAL_RARE_VALUE_STORAGE.copy(),
         GLOBAL_PRIOR_COMB_COUNTS.copy(),
+        GLOBAL_COUNTS_STORAGE.copy(),
     )
