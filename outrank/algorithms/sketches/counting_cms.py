@@ -18,7 +18,7 @@ class CountMinSketch:
     A memory-efficient implementation of the count min sketch algorithm with optimized hashing using Numba JIT.
     """
 
-    def __init__(self, depth=6, width=2**22, M=None):
+    def __init__(self, depth=6, width=2**15, M=None):
         self.depth = depth
         self.width = width
         self.hash_seeds = np.array(np.random.randint(low=0, high=2**31 - 1, size=depth), dtype=np.uint32)
@@ -33,7 +33,7 @@ class CountMinSketch:
             M[i, location] += delta
 
     def add(self, x, delta=1):
-        if len(self.tmp_vals) < 10 ** 5 or sys.getsizeof(self.tmp_vals) / (10 ** 3) < 100.0:
+        if len(self.tmp_vals) < 10 ** 4 or sys.getsizeof(self.tmp_vals) / (10 ** 3) < 100.0:
             self.tmp_vals.add(x)
         CountMinSketch._add(self.M, x, self.depth, self.width, self.hash_seeds, delta)
 
