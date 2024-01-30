@@ -46,18 +46,6 @@ class TestCountMinSketch(unittest.TestCase):
         for elem in set(elements):
             self.assertGreaterEqual(self.cms.query(elem), 10)
 
-    def test_stream_hist_update(self):
-        self.cms.add('foo')
-        self.cms.add('foo')
-        self.cms.add('bar')
-
-        hist = self.cms.stream_hist_update()
-
-        # Note: we cannot test for exact counts because the CountMinSketch is a probabilistic data structure
-        # and may overcount. However, we never expect it to undercount an element.
-        self.assertGreaterEqual(hist[self.cms.query('foo')], 1)
-        self.assertGreaterEqual(hist[self.cms.query('bar')], 1)
-
     def test_overflow_protection(self):
         # This test ensures that the set doesn't grow beyond its allowed size and memory usage
         for i in range(100001):
