@@ -22,7 +22,7 @@ import pandas as pd
 import tqdm
 
 from outrank.algorithms.importance_estimator import get_importances_estimate_pairwise
-from outrank.algorithms.sketches.counting_cms import CountMinSketch
+from outrank.algorithms.sketches.counting_counters_ordinary import PrimitiveConstrainedCounter
 from outrank.algorithms.sketches.counting_ultiloglog import (
     HyperLogLogWCache as HyperLogLog,
 )
@@ -434,7 +434,7 @@ def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any) -> None:
             )
 
         if column not in GLOBAL_COUNTS_STORAGE:
-            GLOBAL_COUNTS_STORAGE[column] = CountMinSketch()
+            GLOBAL_COUNTS_STORAGE[column] = PrimitiveConstrainedCounter()
 
         [GLOBAL_COUNTS_STORAGE[column].add(value) for value in input_dataframe[column].values]
 

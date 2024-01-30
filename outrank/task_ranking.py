@@ -280,7 +280,7 @@ def outrank_task_conduct_ranking(args: Any) -> None:
     with open(f'{args.output_folder}/value_repetitions.json', 'w') as out_counts:
         out_dict = {}
         for k, v in GLOBAL_ITEM_COUNTS.items():
-            actual_hist = np.array([k + v for k, v in v.stream_hist_update().items()])
+            actual_hist = np.array([v for _, v in v.stream_hist_update().items()])
             more_than = lambda n, ary: len(np.where(ary > n)[0])
             out_dict[k] = {x: more_than(x, actual_hist)  for x in [0] + [1 * 10 ** x for x in range(6)]}
         out_counts.write(json.dumps(out_dict))
