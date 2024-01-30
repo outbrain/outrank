@@ -135,6 +135,13 @@ def main():
     )
 
     parser.add_argument(
+        '--max_unique_hist_constraint',
+        type=int,
+        default=30_000,
+        help='Max number of unique values for which counts are recalled.',
+    )
+
+    parser.add_argument(
         '--transformers',
         type=str,
         default='none',
