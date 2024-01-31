@@ -159,7 +159,7 @@ def main():
         '--feature_set_focus',
         type=str,
         default=None,
-        help='Collection of which feature transformations to consider. To consider only --reference_model_JSON features, set _all_from_reference_json',
+        help='Collection of which feature transformations to consider. To consider only --reference_model_JSON features, set _all_from_reference_JSON',
     )
 
     parser.add_argument(
