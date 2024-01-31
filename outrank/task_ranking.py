@@ -281,11 +281,14 @@ def outrank_task_conduct_ranking(args: Any) -> None:
     with open(f'{args.output_folder}/value_repetitions.json', 'w') as out_counts:
         out_dict = {}
         for k, v in GLOBAL_ITEM_COUNTS.items():
-            frequencies = list(v.default_counter.values())
+            frequencies = np.array(list(v.default_counter.values()))
+            more_than = lambda n, ary: len(np.where(ary > n)[0])
+            out_dict[k] = {str(x): str(more_than(x, frequencies))  for x in [0] + [1 * 10 ** x for x in range(6)]}
             if len(frequencies) < args.histogram_max_bins:
-                out_dict[k] = sorted(frequencies)
+                out_dict[k]["quantiles"] = str(sorted(list(frequencies)))
             else:
-                out_dict[k] = quantiles(frequencies, n=args.histogram_max_bins)
+                out_dict[k]["quantiles"] = str(quantiles(list(frequencies), n=args.histogram_max_bins))
+        print(out_dict)
         out_counts.write(json.dumps(out_dict))
 
     with open(f'{args.output_folder}/combination_estimation_counts.json', 'w') as out_counts:
