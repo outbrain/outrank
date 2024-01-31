@@ -9,6 +9,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from statistics import quantiles
 
 from outrank.algorithms.importance_estimator import rank_features_3MR
 from outrank.core_ranking import estimate_importances_minibatches
@@ -280,9 +281,11 @@ def outrank_task_conduct_ranking(args: Any) -> None:
     with open(f'{args.output_folder}/value_repetitions.json', 'w') as out_counts:
         out_dict = {}
         for k, v in GLOBAL_ITEM_COUNTS.items():
-            actual_hist = np.array(list(v.default_counter.values()))
-            more_than = lambda n, ary: len(np.where(ary > n)[0])
-            out_dict[k] = {x: more_than(x, actual_hist)  for x in [0] + [1 * 10 ** x for x in range(6)]}
+            frequencies = list(v.default_counter.values())
+            if len(frequencies) < args.histogram_max_bins:
+                out_dict[k] = sorted(frequencies)
+            else:
+                out_dict[k] = quantiles(frequencies, n=args.histogram_max_bins)
         out_counts.write(json.dumps(out_dict))
 
     with open(f'{args.output_folder}/combination_estimation_counts.json', 'w') as out_counts:

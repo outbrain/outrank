@@ -159,7 +159,7 @@ def main():
         '--feature_set_focus',
         type=str,
         default=None,
-        help='Collection of which feature transformations to consider',
+        help='Collection of which feature transformations to consider. To consider only --reference_model_JSON features, set _all_from_reference_json',
     )
 
     parser.add_argument(
@@ -238,7 +238,13 @@ def main():
         default=1.0,
         help='If < 1.0, MI algorithm will further subsample data in stratified manner (equal distributions per value if possible).',
     )
-
+    
+    parser.add_argument(
+        '--histogram_max_bins',
+        type=int,
+        default=100,
+        help='Number of histogram bins in value_repetitions.json',
+    )
 
     args = parser.parse_args()
 
