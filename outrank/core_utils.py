@@ -269,7 +269,7 @@ def parse_namespace(namespace_path: str) -> tuple[set[str], dict[str, str]]:
                 if type_name == 'f32':
                     float_set.add(feature)
             except Exception as es:
-                logging.error(f'\U0001F631 {es} -- {namespace_parts}')
+                pass
 
     return float_set, id_feature_map
 

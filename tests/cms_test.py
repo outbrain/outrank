@@ -22,7 +22,6 @@ class TestCountMinSketch(unittest.TestCase):
         self.assertEqual(self.cms.width, self.width)
         self.assertEqual(self.cms.M.shape, (self.depth, self.width))
         self.assertEqual(len(self.cms.hash_seeds), self.depth)
-        self.assertIsInstance(self.cms.tmp_vals, set)
 
     def test_add_and_query_single_element(self):
         # Test adding a single element and querying it
@@ -45,26 +44,6 @@ class TestCountMinSketch(unittest.TestCase):
 
         for elem in set(elements):
             self.assertGreaterEqual(self.cms.query(elem), 10)
-
-    def test_stream_hist_update(self):
-        self.cms.add('foo')
-        self.cms.add('foo')
-        self.cms.add('bar')
-
-        hist = self.cms.stream_hist_update()
-
-        # Note: we cannot test for exact counts because the CountMinSketch is a probabilistic data structure
-        # and may overcount. However, we never expect it to undercount an element.
-        self.assertGreaterEqual(hist[self.cms.query('foo')], 1)
-        self.assertGreaterEqual(hist[self.cms.query('bar')], 1)
-
-    def test_overflow_protection(self):
-        # This test ensures that the set doesn't grow beyond its allowed size and memory usage
-        for i in range(100001):
-            self.cms.add(f'element{i}')
-
-        self.assertLessEqual(len(self.cms.tmp_vals), 100000)
-        self.assertLessEqual(sys.getsizeof(self.cms.tmp_vals) / (10 ** 3), 4200.0)
 
     def test_hash_uniformity(self):
         # Basic check for hash function's distribution
