@@ -20,9 +20,6 @@ class PrimitiveConstrainedCounter:
         if len(self.default_counter) < self.max_bound_thr:
             self.default_counter[val] += 1
 
-    def stream_hist_update(self):
-        return dict(self.default_counter)
-
 
 if __name__ == '__main__':
     from collections import Counter
@@ -36,5 +33,3 @@ if __name__ == '__main__':
     cms.batch_add(items)  # Use the batch_add function
 
     print(Counter(items))  # Print the exact counts for comparison
-    print(cms.stream_hist_update())
-    print(list(v for _, v in cms.stream_hist_update().items()))
