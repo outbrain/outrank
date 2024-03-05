@@ -45,7 +45,7 @@ def plot_precision_curve(results, pivot_score_key, mismatches, axs, c1, c2):
 
     axs[c1,c2].plot(instances, values, marker='o', linestyle='-', color='black')
     axs[c1,c2].invert_xaxis()
-    axs[c1,c2].set(xlabel='Proportion of data used (%)', ylabel=f'hits@{mismatches} (%)', title=f'Feature Ranking Precision Curve at Top {mismatches} Features')
+    axs[c1,c2].set(xlabel='Proportion of data used (%)', ylabel=f'hits@{mismatches} (%)', title=f'Approximation, top {mismatches} Features')
     axs[c1,c2].grid(True)
 
 if __name__ == '__main__':
