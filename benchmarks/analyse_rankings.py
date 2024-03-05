@@ -45,7 +45,7 @@ def plot_precision_curve(results, pivot_score_key, mismatches, axs, c1, c2):
 
     axs[c1,c2].plot(instances, values, marker='o', linestyle='-', color='black')
     axs[c1,c2].invert_xaxis()
-    axs[c1,c2].set(xlabel='Proportion of data used (%)', ylabel=f'hits@{mismatches}', title=f'Feature Ranking Precision Curve at Top {mismatches} Features')
+    axs[c1,c2].set(xlabel='Proportion of data used (%)', ylabel=f'hits@{mismatches} (%)', title=f'Feature Ranking Precision Curve at Top {mismatches} Features')
     axs[c1,c2].grid(True)
 
 if __name__ == '__main__':
@@ -54,7 +54,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     dfolder = sys.argv[1]
-    mismatch_range = [1, 3, 5, 10]
+    mismatch_range = [1, 5, 10, 20]
     fig, axs = plt.subplots(2, 2)
     fig.set_figheight(10)
     fig.set_figwidth(10)
