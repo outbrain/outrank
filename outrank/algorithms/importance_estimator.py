@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
 from sklearn.feature_selection import mutual_info_classif
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.metrics import adjusted_mutual_info_score
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import OneHotEncoder
@@ -38,11 +38,11 @@ def sklearn_MI(vector_first: Any, vector_second: Any) -> float:
 
 
 def sklearn_surrogate(
-    vector_first: Any, vector_second: Any, surrogate_model: str,
+    vector_first: Any, vector_second: Any, X: Any, surrogate_model: str
 ) -> float:
-    if surrogate_model == 'surrogate-LR':
+    if 'surrogate-LR' in surrogate_model:
         clf = LogisticRegression(max_iter=100000)
-    elif surrogate_model == 'surrogate-SVM':
+    elif 'surrogate-SVM' in surrogate_model:
         clf = SVC(gamma='auto', probability=True)
 
     transf = OneHotEncoder()
@@ -57,17 +57,22 @@ def sklearn_surrogate(
     unique_values, counts = np.unique(vector_second, return_counts=True)
 
     # Establish min support for this type of ranking.
-    if counts[0] < len(unique_values) * (2**5):
-        estimate_feature_importance = 0
+    # if counts[0] < len(unique_values) * (2**5):
+    #     estimate_feature_importance = 0
 
-    else:
+    if X.shape[0] == 0 and X.shape[1] == 0:
         vector_first = transf.fit_transform(vector_first.reshape(-1, 1))
         estimate_feature_importance_list = cross_val_score(
             clf, vector_first, vector_second, scoring='neg_log_loss', cv=4,
         )
-
-        estimate_feature_importance = 1 + \
-            np.median(estimate_feature_importance_list)
+    else:
+        X = np.concatenate((X,vector_first.reshape(-1, 1)), axis=1)
+        X = transf.fit_transform(X)
+        estimate_feature_importance_list = cross_val_score(
+            clf, X, vector_second, scoring='neg_log_loss', cv=4,
+        )   
+    estimate_feature_importance = 1 + \
+        np.median(estimate_feature_importance_list)        
 
     return estimate_feature_importance
 
@@ -97,7 +102,7 @@ def sklearn_mi_adj(vector_first, vector_second):
     return estimate_feature_importance
 
 
-def get_importances_estimate_pairwise(combination, args, tmp_df):
+def get_importances_estimate_pairwise(combination, reference_model_features, args, tmp_df):
     """A method for parallel importances estimation. As interaction scoring is independent, individual scores can be computed in parallel."""
 
     feature_one = combination[0]
@@ -122,8 +127,12 @@ def get_importances_estimate_pairwise(combination, args, tmp_df):
         estimate_feature_importance = sklearn_MI(vector_first, vector_second)
 
     elif 'surrogate-' in args.heuristic:
+        X = np.array(float)
+        if ('-prior' in args.heuristic) and (len(reference_model_features) > 0):
+            X = tmp_df[reference_model_features].values
+
         estimate_feature_importance = sklearn_surrogate(
-            vector_first, vector_second, args.heuristic,
+            vector_first, vector_second, X, args.heuristic
         )
 
     elif 'MI-numba' in args.heuristic:

@@ -130,9 +130,13 @@ def mixed_rank_graph(
     # Map the scoring calls to the worker pool
     pbar.set_description('Allocating thread pool')
 
+    reference_model_features = {}
+    if 'prior' in args.heuristic:
+        reference_model_features = [(" AND ").join(item.split(",")) for item in extract_features_from_reference_JSON(args.reference_model_JSON, full_feature_space = True)]
+
     # starmap is an alternative that is slower unfortunately (but nicer)
     def get_grounded_importances_estimate(combination: tuple[str]) -> Any:
-        return get_importances_estimate_pairwise(combination, args, tmp_df=tmp_df)
+        return get_importances_estimate_pairwise(combination, reference_model_features, args, tmp_df=tmp_df)
 
     start_enc_timer = timer()
     with cpu_pool as p:
