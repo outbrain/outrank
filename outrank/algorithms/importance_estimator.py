@@ -44,6 +44,8 @@ def sklearn_surrogate(
         clf = LogisticRegression(max_iter=100000)
     elif 'surrogate-SVM' in surrogate_model:
         clf = SVC(gamma='auto', probability=True)
+    elif 'surrogate-SGD' in surrogate_model:
+        clf = SGDClassifier(max_iter=100000, loss='log_loss')
 
     transf = OneHotEncoder()
 
