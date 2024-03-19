@@ -17,8 +17,13 @@ from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
 
+from outrank.core_utils import is_prior_heuristic
+
+
 logger = logging.getLogger('syn-logger')
 logger.setLevel(logging.DEBUG)
+
+num_folds = 4
 
 try:
     from outrank.algorithms.feature_ranking import ranking_mi_numba
@@ -40,13 +45,9 @@ def sklearn_MI(vector_first: Any, vector_second: Any) -> float:
 def sklearn_surrogate(
     vector_first: Any, vector_second: Any, X: Any, surrogate_model: str
 ) -> float:
-    if 'surrogate-LR' in surrogate_model:
-        clf = LogisticRegression(max_iter=100000)
-    elif 'surrogate-SVM' in surrogate_model:
-        clf = SVC(gamma='auto', probability=True)
-    elif 'surrogate-SGD' in surrogate_model:
-        clf = SGDClassifier(max_iter=100000, loss='log_loss')
-
+    
+    clf = initialize_classifier(surrogate_model)
+    
     transf = OneHotEncoder()
 
     # They do not commute, swap if needed
@@ -58,20 +59,16 @@ def sklearn_surrogate(
 
     unique_values, counts = np.unique(vector_second, return_counts=True)
 
-    # Establish min support for this type of ranking.
-    # if counts[0] < len(unique_values) * (2**5):
-    #     estimate_feature_importance = 0
-
     if X.shape[0] == 0 and X.shape[1] == 0:
         vector_first = transf.fit_transform(vector_first.reshape(-1, 1))
         estimate_feature_importance_list = cross_val_score(
-            clf, vector_first, vector_second, scoring='neg_log_loss', cv=4,
+            clf, vector_first, vector_second, scoring='neg_log_loss', cv=num_folds,
         )
     else:
-        X = np.concatenate((X,vector_first.reshape(-1, 1)), axis=1)
+        X = np.concatenate((X, vector_first.reshape(-1, 1)), axis=1)
         X = transf.fit_transform(X)
         estimate_feature_importance_list = cross_val_score(
-            clf, X, vector_second, scoring='neg_log_loss', cv=4,
+            clf, X, vector_second, scoring='neg_log_loss', cv=num_folds,
         )   
     estimate_feature_importance = 1 + \
         np.median(estimate_feature_importance_list)        
@@ -130,7 +127,7 @@ def get_importances_estimate_pairwise(combination, reference_model_features, arg
 
     elif 'surrogate-' in args.heuristic:
         X = np.array(float)
-        if ('-prior' in args.heuristic) and (len(reference_model_features) > 0):
+        if is_prior_heuristic(args) and (len(reference_model_features) > 0):
             X = tmp_df[reference_model_features].values
 
         estimate_feature_importance = sklearn_surrogate(
@@ -224,3 +221,15 @@ def get_importances_estimate_nonmyopic(args: Any, tmp_df: pd.DataFrame):
     # TODO - nonmyopic algorithms - tmp_df \ args.label vs. label
     # TODO - this is to be executed directly on df - no need for parallel kernel(s)
     pass
+
+
+def initialize_classifier(surrogate_model: string):
+    if 'surrogate-LR' in surrogate_model:
+        return LogisticRegression(max_iter=100000)
+    elif 'surrogate-SVM' in surrogate_model:
+        return SVC(gamma='auto', probability=True)
+    elif 'surrogate-SGD' in surrogate_model:
+        return SGDClassifier(max_iter=100000, loss='log_loss')
+    else:
+        logging.warning(f'The chosen surrogate model {surrogate_model} is not supported, falling back to surrogate-SGD')
+        return SGDClassifier(max_iter=100000, loss='log_loss')

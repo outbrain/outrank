@@ -32,6 +32,7 @@ from outrank.core_utils import generic_line_parser
 from outrank.core_utils import internal_hash
 from outrank.core_utils import NominalFeatureSummary
 from outrank.core_utils import NumericFeatureSummary
+from outrank.core_utils import is_prior_heuristic
 from outrank.feature_transformations.ranking_transformers import FeatureTransformerGeneric
 from outrank.feature_transformations.ranking_transformers import FeatureTransformerNoise
 
@@ -131,7 +132,7 @@ def mixed_rank_graph(
     pbar.set_description('Allocating thread pool')
 
     reference_model_features = {}
-    if 'prior' in args.heuristic:
+    if is_prior_heuristic(args):            
         reference_model_features = [(" AND ").join(item.split(",")) for item in extract_features_from_reference_JSON(args.reference_model_JSON, full_feature_space = True)]
 
     # starmap is an alternative that is slower unfortunately (but nicer)

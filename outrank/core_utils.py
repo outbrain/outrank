@@ -644,3 +644,10 @@ def summarize_rare_counts(
     final_df.to_csv(
         f'{args.output_folder}/feature_sparsity_summary.tsv', index=False, sep='\t',
     )
+
+
+def is_prior_heuristic(args: Any):
+    if "-prior" in args.heuristic and args.reference_model_JSON and args.reference_model_JSON != "":
+        return True
+    return False
+
