@@ -197,12 +197,14 @@ def compute_combined_features(
     if args.reference_model_JSON != '':
         combined_features = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only = True)
         full_combination_space = [combination.split(',') for combination in combined_features]
+        if is_prior_heuristic(args):
+            full_combination_space = list(set(full_combination_space) | set(itertools.combinations(all_columns, interaction_order)))
     else:
         full_combination_space = list(
             itertools.combinations(all_columns, interaction_order),
         )
 
-    if args.combination_number_upper_bound and args.reference_model_JSON != '':
+    if args.combination_number_upper_bound:
         random.shuffle(full_combination_space)
         full_combination_space = full_combination_space[
             : args.combination_number_upper_bound

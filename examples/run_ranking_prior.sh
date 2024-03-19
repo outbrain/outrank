@@ -11,11 +11,11 @@ outrank \
     --data_source ob-csv \
     --heuristic surrogate-SGD-prior \
     --target_ranking_only True \
-    --interaction_order 1 \
+    --interaction_order 2 \
     --combination_number_upper_bound 2048 \
     --num_threads 12 \
     --output_folder ./some_output_folder \
-    --subsampling 1 \
+    --subsampling 100 \
     --minibatch_size 10000 \
     --label_column info_click_valid \
     --reference_model_JSON $PATH_TO_YOUR_REFERENCE_MODEL
