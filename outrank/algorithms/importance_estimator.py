@@ -223,7 +223,7 @@ def get_importances_estimate_nonmyopic(args: Any, tmp_df: pd.DataFrame):
     pass
 
 
-def initialize_classifier(surrogate_model: string):
+def initialize_classifier(surrogate_model: str):
     if 'surrogate-LR' in surrogate_model:
         return LogisticRegression(max_iter=100000)
     elif 'surrogate-SVM' in surrogate_model:
