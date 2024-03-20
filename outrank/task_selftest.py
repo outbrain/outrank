@@ -22,7 +22,7 @@ def conduct_self_test():
         'outrank --task data_generator --num_synthetic_rows 100000', shell=True,
     )
     subprocess.run(
-        'outrank --task ranking --data_path test_data_synthetic --data_source csv-raw --combination_number_upper_bound 60;',
+        'outrank --task ranking --data_path test_data_synthetic --data_source csv-raw --combination_number_upper_bound 60 --heuristic surrogate-SGD-prior --reference_model_JSON tests/test_ref_model.json --interaction_order 2;',
         shell=True,
     )
 

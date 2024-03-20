@@ -59,7 +59,7 @@ def sklearn_surrogate(
 
     unique_values, counts = np.unique(vector_second, return_counts=True)
 
-    if X.shape[0] == 0 and X.shape[1] == 0:
+    if X.size <= 1:
         vector_first = transf.fit_transform(vector_first.reshape(-1, 1))
         estimate_feature_importance_list = cross_val_score(
             clf, vector_first, vector_second, scoring='neg_log_loss', cv=num_folds,
