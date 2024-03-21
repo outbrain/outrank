@@ -210,7 +210,7 @@ def compute_combined_features(
         if args.reference_model_JSON != '':
             model_combinations = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only = True)
             model_combinations = [tuple(sorted(combination.split(','))) for combination in model_combinations]
-            full_combination_space = [combination.split(',') for combination in model_combinations]
+            full_combination_space = model_combinations
         else:
             full_combination_space = list(
                 itertools.combinations(all_columns, interaction_order),
@@ -707,6 +707,7 @@ def estimate_importances_minibatches(
                 logger,
                 local_pbar,
             )
+            print(importances_batch)
 
             bounds_storage_batch.append(bounds_storage)
             memory_storage_batch.append(memory_storage)
