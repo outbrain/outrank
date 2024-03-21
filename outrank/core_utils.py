@@ -8,6 +8,7 @@ import os
 from collections import Counter
 from collections import defaultdict
 from dataclasses import dataclass
+from itertools import islice
 from typing import Any
 from typing import Dict
 from typing import List
@@ -49,9 +50,9 @@ def write_json_dump_to_file(args: Any, config_name: str) -> None:
         out_config.write(out_content)
 
 
-def internal_hash(input_obj: str) -> str:
+def internal_hash(input_obj: str) -> int:
     """A generic internal hash used throughout ranking procedure - let's hardcode seed here for sure"""
-    return xxhash.xxh32(input_obj, seed=20141025).hexdigest()
+    return xxhash.xxh32(input_obj, seed=20141025).intdigest()
 
 
 @dataclass
@@ -641,3 +642,9 @@ def summarize_rare_counts(
     final_df.to_csv(
         f'{args.output_folder}/feature_sparsity_summary.tsv', index=False, sep='\t',
     )
+
+
+def batcher(iterable, batch_size):
+    iterator = iter(iterable)
+    while batch := list(islice(iterator, batch_size)):
+        yield batch

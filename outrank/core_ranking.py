@@ -203,30 +203,73 @@ def compute_combined_features(
             : args.combination_number_upper_bound
         ]
 
+    input_dataframe = input_dataframe.map(internal_hash)
     com_counter = 0
     new_feature_hash = {}
     for new_combination in full_combination_space:
         pbar.set_description(
             f'Created {com_counter}/{len(full_combination_space)}',
         )
-        combined_feature: list[str] = [str(0)] * input_dataframe.shape[0]
-        for feature in new_combination:
-            tmp_feature = input_dataframe[feature].tolist()
-            for enx, el in enumerate(tmp_feature):
-                combined_feature[enx] = str(
-                    internal_hash(
-                        str(combined_feature[enx]) + str(el),
-                    ),
-                )
-        ftr_name = join_string.join(str(x) for x in new_combination)
+        combined_feature, ftr_name = compute_combined_feature(input_dataframe, new_combination, join_string)
+
         new_feature_hash[ftr_name] = combined_feature
         com_counter += 1
+
     tmp_df = pd.DataFrame(new_feature_hash)
     pbar.set_description('Concatenating into final frame ..')
     input_dataframe = pd.concat([input_dataframe, tmp_df], axis=1)
     del tmp_df
 
     return input_dataframe
+
+
+def compute_combined_feature(
+    input_dataframe: pd.DataFrame,
+    new_combination: tuple[str, ...],
+    join_string: str,
+) -> tuple[list[str], str]:
+
+    combined_series = np.zeros(input_dataframe.shape[0])
+
+    for feature in new_combination:
+        combined_series += input_dataframe[feature].values
+
+    combined_feature = combined_series.tolist()
+
+    ftr_name = join_string.join(new_combination)
+
+    return combined_feature, ftr_name
+
+# def compute_combined_feature(input_dataframe: pd.DataFrame,
+#                              new_combination: Tuple[str],
+#                              join_string: str) -> Tuple[List[str], str]:
+
+#     str_columns = {feature: input_dataframe[feature].astype(str) for feature in new_combination}
+
+#     combined_series = pd.Series(['0'] * input_dataframe.shape[0], dtype=str)
+
+#     for feature in new_combination:
+#         combined_series = combined_series.astype(str) + str_columns[feature]
+#         combined_series = combined_series.apply(internal_hash)
+
+#     combined_feature = combined_series.tolist()
+
+#     ftr_name = join_string.join(new_combination)
+
+#     return combined_feature, ftr_name
+
+# def compute_combined_feature(input_dataframe: pd.DataFrame, new_combination: Tuple[str], join_string: str) -> Tuple[list[str], str]:
+#     combined_feature: list[str] = [str(0)] * input_dataframe.shape[0]
+#     for feature in new_combination:
+#         tmp_feature = input_dataframe[feature].tolist()
+#         for enx, el in enumerate(tmp_feature):
+#             combined_feature[enx] = str(
+#                 internal_hash(
+#                     str(combined_feature[enx]) + str(el),
+#                 ),
+#             )
+#     ftr_name = join_string.join(str(x) for x in new_combination)
+#     return combined_feature, ftr_name
 
 
 def compute_expanded_multivalue_features(
