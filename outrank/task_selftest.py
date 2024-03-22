@@ -1,6 +1,5 @@
 # helper set of methods that enable anywhere verification of core functions
 from __future__ import annotations
-
 import logging
 import os
 import shutil
@@ -22,16 +21,16 @@ def conduct_self_test():
         'outrank --task data_generator --num_synthetic_rows 100000', shell=True,
     )
     subprocess.run(
-        'outrank --task ranking --data_path test_data_synthetic --data_source csv-raw --combination_number_upper_bound 60;',
+        'outrank --task ranking --data_path test_data_synthetic --data_source csv-raw;',
         shell=True,
     )
 
     dfx = pd.read_csv('ranking_outputs/pairwise_ranks.tsv', sep='\t')
 
     logger.info("Verifying output's properties ..")
-    assert dfx.shape[0] == 120
+    assert dfx.shape[0] == 201
     assert dfx.shape[1] == 3
-    assert dfx['FeatureA'].values.tolist().pop() == 'label-(81; 100)' or dfx['FeatureB'].values.tolist().pop() == 'label-(81; 100)'
+    assert dfx['FeatureA'].values.tolist().pop() == 'label-(2; 100)' or dfx['FeatureB'].values.tolist().pop() == 'label-(2; 100)'
 
     to_remove = ['ranking_outputs', 'test_data_synthetic']
     for path in to_remove:

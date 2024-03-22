@@ -244,6 +244,7 @@ def compute_combined_features(
     pbar.set_description('Concatenating into final frame ..')
     input_dataframe = pd.concat([input_dataframe, tmp_df], axis=1)
     del tmp_df
+    
     return input_dataframe
 
 

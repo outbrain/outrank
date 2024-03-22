@@ -14,7 +14,7 @@ def generate_random_matrix(num_features=100, size=20000):
     # Some noise
 
     target[target < 40] = 0
-    target[target > 39] = 0
+    target[target > 39] = 1
     return sample, target
 
 
