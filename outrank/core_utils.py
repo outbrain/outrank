@@ -52,6 +52,8 @@ def write_json_dump_to_file(args: Any, config_name: str) -> None:
 
 def internal_hash(input_obj: str) -> int:
     """A generic internal hash used throughout ranking procedure - let's hardcode seed here for sure"""
+    if isinstance(input_obj, int):
+        input_obj = str(input_obj)
     return xxhash.xxh32(input_obj, seed=20141025).intdigest()
 
 

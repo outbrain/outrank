@@ -3,17 +3,19 @@ This module implements probabilistic data structure which is able to calculate t
 """
 from __future__ import annotations
 
+import sys
+
 import numpy as np
 import xxhash
 
 
 class HyperLogLogWCache:
-    def __init__(self, error_rate=0.005):
+    def __init__(self, max_prehash_size=1000000):
         # int(np.ceil(np.log2((1.04 / error_rate) ** 2)))
         self.p = 19
         self.m = 1 << self.p
         self.warmup_set = set()
-        self.warmup_size = int(self.m / 2)
+        self.warmup_size = max_prehash_size
         self.width = 64 - self.p
         self.hll_flag = False
 
@@ -33,7 +35,7 @@ class HyperLogLogWCache:
         self.M[j] = max(self.M[j], rho)
 
     def add(self, value):
-        if len(self.warmup_set) < self.warmup_size and not self.hll_flag:
+        if sys.getsizeof(self.warmup_set) < self.warmup_size and not self.hll_flag:
             self.warmup_set.add(value)
         elif not self.hll_flag:
             if not self.hll_flag:
@@ -59,6 +61,38 @@ class HyperLogLogWCache:
             return len(self.warmup_set)
 
 
+def cardinality_kernel(algo = 'cache'):
+
+    start_time = time.time()
+
+    if algo == 'Hhll (10)':
+        GLOBAL_CARDINALITY_STORAGE = {1: None}
+        GLOBAL_CARDINALITY_STORAGE[1] = HyperLogLogWCache(10)
+    elif algo == 'Hhll (10000)':
+        GLOBAL_CARDINALITY_STORAGE = {1: None}
+        GLOBAL_CARDINALITY_STORAGE[1] = HyperLogLogWCache(10000)
+    elif algo == 'hll+ (0.005)':
+        import hyperloglog
+        GLOBAL_CARDINALITY_STORAGE = {1: None}
+        GLOBAL_CARDINALITY_STORAGE[1] = hyperloglog.HyperLogLog(0.005)
+    elif algo == 'hll+ (0.01)':
+        import hyperloglog
+        GLOBAL_CARDINALITY_STORAGE = {1: None}
+        GLOBAL_CARDINALITY_STORAGE[1] = hyperloglog.HyperLogLog(0.01)
+    elif algo == 'set':
+        GLOBAL_CARDINALITY_STORAGE = {1: set()}
+
+    for j in ground:
+        GLOBAL_CARDINALITY_STORAGE[1].add(j)
+
+    size1 = asizeof.asizeof(GLOBAL_CARDINALITY_STORAGE)
+    error1 = 100 * \
+        (1 - len(GLOBAL_CARDINALITY_STORAGE[1]) / len(set(ground)))
+    end_time = time.time()
+    tp1 = end_time - start_time
+    return tp1, error1
+
+
 if __name__ == '__main__':
     import random
     import string
@@ -69,7 +103,11 @@ if __name__ == '__main__':
     import seaborn as sns
     import tqdm
     from pympler import asizeof
-
+#    sns.set_style("whitegrid")
+    plt.rcParams.update({
+        'text.usetex': True,
+        'font.family': 'Helvetica',
+    })
     def get_random_string(length):
         # choose from all lowercase letter
         letters = string.ascii_lowercase
@@ -78,100 +116,66 @@ if __name__ == '__main__':
 
     # results_df = []
     # num_vals = 100000
-    # nbits = 16
-    # for _ in range(3):
-    #     for j in tqdm.tqdm(range(1000000, 10000000, 1000)):
+    # for _ in range(10):
+    #     for j in tqdm.tqdm(range(1000, 100000, 1000)):
     #         ground = list(set(np.random.randint(0, j, num_vals).tolist()))
     #         ground = ground + [
     #             get_random_string(random.randint(1, 15)) for k in range(j)
     #         ]
 
-    #         start_time = time.time()
-    #         GLOBAL_CARDINALITY_STORAGE = {}
-    #         GLOBAL_CARDINALITY_STORAGE[1] = HyperLogLogWCache(0.005)
 
-    #         for j in ground:
-    #             GLOBAL_CARDINALITY_STORAGE[1].add(j)
+    #         for algo in ['Hhll (10)', 'Hhll (10000)', 'hll+ (0.005)', 'hll+ (0.01)', 'set']:
+    #             tp, error = cardinality_kernel(algo)
+    #             results_df.append(
+    #                 {
+    #                     'num_samples': len(ground),
+    #                     'time': tp,
+    #                     'algo': algo,
+    #                     'error': error,
+    #                 }
+    #             )
 
-    #         size1 = asizeof.asizeof(GLOBAL_CARDINALITY_STORAGE)
-    #         error1 = 100 * \
-    #             (1 - len(GLOBAL_CARDINALITY_STORAGE[1]) / len(set(ground)))
-    #         end_time = time.time()
-    #         tp1 = end_time - start_time
-
-    #         import hyperloglog
-
-    #         start_time = time.time()
-    #         GLOBAL_CARDINALITY_STORAGE = {}
-    #         GLOBAL_CARDINALITY_STORAGE[1] = hyperloglog.HyperLogLog(0.005)
-
-    #         for j in ground:
-    #             GLOBAL_CARDINALITY_STORAGE[1].add(j)
-    #         size2 = asizeof.asizeof(GLOBAL_CARDINALITY_STORAGE)
-    #         error2 = 100 * \
-    #             (1 - len(GLOBAL_CARDINALITY_STORAGE[1]) / len(set(ground)))
-    #         end_time = time.time()
-    #         tp2 = end_time - start_time
-
-    #         start_time = time.time()
-    #         GLOBAL_CARDINALITY_STORAGE = set()
-
-    #         for j in ground:
-    #             GLOBAL_CARDINALITY_STORAGE.add(j)
-
-    #         size3 = asizeof.asizeof(GLOBAL_CARDINALITY_STORAGE)
-    #         error3 = 100 * \
-    #             (1 - len(GLOBAL_CARDINALITY_STORAGE) / len(set(ground)))
-    #         end_time = time.time()
-    #         tp3 = end_time - start_time
-
-    #         results_df.append(
-    #             {
-    #                 'num_samples': len(ground),
-    #                 'time': tp3,
-    #                 'algo': 'set',
-    #                 'error': error3,
-    #             },
-    #         )
-    #         results_df.append(
-    #             {
-    #                 'num_samples': len(ground),
-    #                 'time': tp2,
-    #                 'algo': 'default',
-    #                 'error': error2,
-    #             },
-    #         )
-    #         results_df.append(
-    #             {
-    #                 'num_samples': len(ground),
-    #                 'time': tp1,
-    #                 'algo': f'hllc ({nbits}, mixed)',
-    #                 'error': error1,
-    #             },
-    #         )
 
     # out_df = pd.DataFrame(results_df)
     # out_df.to_csv('backup.csv')
-    # print(out_df)
-    # print(out_df.groupby('algo').mean())
-    # sns.lineplot(
-    #     x=out_df.num_samples, y=out_df.error,
-    #     hue=out_df.algo, alpha=0.5,
-    # )
-    # plt.tight_layout()
-    # plt.ylabel('Num. of unique values in data')
-    # plt.ylabel('Abs error')
-    # plt.savefig('linep.pdf')
-    # plt.clf()
-    # plt.cla()
+    pals = 'coolwarm'
+    out_df = pd.read_csv('backup.csv')
+    print(out_df)
+    print(out_df.groupby('algo').mean())
+    g = sns.jointplot(
+        y=out_df.num_samples, x=out_df.error,
+        hue=out_df.algo, alpha=0.6, palette=pals,
+    )
+    plt.tight_layout()
+    g.ax_marg_y.remove()
+    plt.ylim(0, max(out_df.num_samples.astype(float)))
 
-    # sns.lineplot(
-    #     x=out_df.num_samples.astype(
-    #         float,
-    #     ), y=out_df.time, hue=out_df.algo,
-    # )
-    # plt.tight_layout()
-    # plt.ylabel('Time (s)')
-    # plt.savefig('barp.pdf')
-    # plt.clf()
-    # plt.cla()
+    plt.ylabel('Num. of unique values in data')
+    plt.xlabel('Abs error')
+    plt.savefig('hllErr.pdf')
+    plt.clf()
+    plt.cla()
+
+
+    sns.histplot(
+        y=out_df.num_samples.astype(
+            float,
+        ), x=out_df.time, hue=out_df.algo,
+        alpha=0.3,
+        palette=pals,
+
+    )
+    g = sns.jointplot(
+        y=out_df.num_samples.astype(
+            float,
+        ), x=out_df.time, hue=out_df.algo, alpha=.6, style=out_df.algo,
+        palette=pals,
+    )
+    g.ax_marg_y.remove()
+    plt.ylim(0, max(out_df.num_samples.astype(float)))
+    plt.tight_layout()
+    plt.xlabel('Num. of unique values in data')
+    plt.ylabel('Time (s)')
+    plt.savefig('hllTime.pdf')
+    plt.clf()
+    plt.cla()
