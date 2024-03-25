@@ -115,7 +115,6 @@ def mixed_rank_graph(
     out_time_struct['encoding_columns'] = end_enc_timer - start_enc_timer
 
     combinations = get_combinations_from_columns(all_columns, args)
-    combinations = prior_combinations_sample(combinations, args)
     random.shuffle(combinations)
 
     if args.heuristic == 'Constant':
@@ -199,9 +198,10 @@ def compute_combined_features(
 
     if args.combination_number_upper_bound and args.reference_model_JSON != '':
         random.shuffle(full_combination_space)
-        full_combination_space = full_combination_space[
-            : args.combination_number_upper_bound
-        ]
+        full_combination_space= prior_combinations_sample(full_combination_space, args)
+        # full_combination_space = full_combination_space[
+        #     : args.combination_number_upper_bound
+        # ]
 
     input_dataframe = input_dataframe.map(internal_hash)
     com_counter = 0
