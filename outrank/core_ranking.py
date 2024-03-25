@@ -240,37 +240,6 @@ def compute_combined_feature(
 
     return combined_feature, ftr_name
 
-# def compute_combined_feature(input_dataframe: pd.DataFrame,
-#                              new_combination: Tuple[str],
-#                              join_string: str) -> Tuple[List[str], str]:
-
-#     str_columns = {feature: input_dataframe[feature].astype(str) for feature in new_combination}
-
-#     combined_series = pd.Series(['0'] * input_dataframe.shape[0], dtype=str)
-
-#     for feature in new_combination:
-#         combined_series = combined_series.astype(str) + str_columns[feature]
-#         combined_series = combined_series.apply(internal_hash)
-
-#     combined_feature = combined_series.tolist()
-
-#     ftr_name = join_string.join(new_combination)
-
-#     return combined_feature, ftr_name
-
-# def compute_combined_feature(input_dataframe: pd.DataFrame, new_combination: Tuple[str], join_string: str) -> Tuple[list[str], str]:
-#     combined_feature: list[str] = [str(0)] * input_dataframe.shape[0]
-#     for feature in new_combination:
-#         tmp_feature = input_dataframe[feature].tolist()
-#         for enx, el in enumerate(tmp_feature):
-#             combined_feature[enx] = str(
-#                 internal_hash(
-#                     str(combined_feature[enx]) + str(el),
-#                 ),
-#             )
-#     ftr_name = join_string.join(str(x) for x in new_combination)
-#     return combined_feature, ftr_name
-
 
 def compute_expanded_multivalue_features(
     input_dataframe: pd.DataFrame, logger: Any, args: Any, pbar: Any,
