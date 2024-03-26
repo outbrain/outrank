@@ -61,7 +61,7 @@ class HyperLogLogWCache:
             return len(self.warmup_set)
 
 
-def cardinality_kernel(algo = 'cache'):
+def cardinality_kernel(algo = 'cache', ground = None):
 
     start_time = time.time()
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     import seaborn as sns
     import tqdm
     from pympler import asizeof
-#    sns.set_style("whitegrid")
+
     plt.rcParams.update({
         'text.usetex': True,
         'font.family': 'Helvetica',
@@ -114,30 +114,30 @@ if __name__ == '__main__':
         result_str = ''.join(random.choice(letters) for i in range(length))
         return result_str
 
-    # results_df = []
-    # num_vals = 100000
-    # for _ in range(10):
-    #     for j in tqdm.tqdm(range(1000, 100000, 1000)):
-    #         ground = list(set(np.random.randint(0, j, num_vals).tolist()))
-    #         ground = ground + [
-    #             get_random_string(random.randint(1, 15)) for k in range(j)
-    #         ]
+    results_df = []
+    num_vals = 100000
+    for _ in range(10):
+        for j in tqdm.tqdm(range(1000, 100000, 1000)):
+            ground = list(set(np.random.randint(0, j, num_vals).tolist()))
+            ground = ground + [
+                get_random_string(random.randint(1, 15)) for k in range(j)
+            ]
 
 
-    #         for algo in ['Hhll (10)', 'Hhll (10000)', 'hll+ (0.005)', 'hll+ (0.01)', 'set']:
-    #             tp, error = cardinality_kernel(algo)
-    #             results_df.append(
-    #                 {
-    #                     'num_samples': len(ground),
-    #                     'time': tp,
-    #                     'algo': algo,
-    #                     'error': error,
-    #                 }
-    #             )
+            for algo in ['Hhll (10)', 'Hhll (10000)', 'hll+ (0.005)', 'hll+ (0.01)', 'set']:
+                tp, error = cardinality_kernel(algo, ground)
+                results_df.append(
+                    {
+                        'num_samples': len(ground),
+                        'time': tp,
+                        'algo': algo,
+                        'error': error,
+                    },
+                )
 
 
-    # out_df = pd.DataFrame(results_df)
-    # out_df.to_csv('backup.csv')
+    out_df = pd.DataFrame(results_df)
+    out_df.to_csv('backup.csv')
     pals = 'coolwarm'
     out_df = pd.read_csv('backup.csv')
     print(out_df)
