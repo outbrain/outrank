@@ -29,7 +29,7 @@ class CompareStrategiesTest(unittest.TestCase):
     def test_stress_multi_feature(self):
         GLOBAL_CARDINALITY_STORAGE = dict()
         for j in range(10):
-            GLOBAL_CARDINALITY_STORAGE[j] = HyperLogLog(0.01)
+            GLOBAL_CARDINALITY_STORAGE[j] = HyperLogLog(100000)
         for j in range(1000):
             for k in range(len(GLOBAL_CARDINALITY_STORAGE)):
                 GLOBAL_CARDINALITY_STORAGE[k].add(1232 + j)

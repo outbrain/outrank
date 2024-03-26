@@ -115,7 +115,6 @@ def mixed_rank_graph(
     out_time_struct['encoding_columns'] = end_enc_timer - start_enc_timer
 
     combinations = get_combinations_from_columns(all_columns, args)
-    combinations = prior_combinations_sample(combinations, args)
     random.shuffle(combinations)
 
     if args.heuristic == 'Constant':
@@ -199,34 +198,47 @@ def compute_combined_features(
 
     if args.combination_number_upper_bound and args.reference_model_JSON != '':
         random.shuffle(full_combination_space)
-        full_combination_space = full_combination_space[
-            : args.combination_number_upper_bound
-        ]
+        full_combination_space= prior_combinations_sample(full_combination_space, args)
+        # full_combination_space = full_combination_space[
+        #     : args.combination_number_upper_bound
+        # ]
 
+    input_dataframe = input_dataframe.map(internal_hash)
     com_counter = 0
     new_feature_hash = {}
     for new_combination in full_combination_space:
         pbar.set_description(
             f'Created {com_counter}/{len(full_combination_space)}',
         )
-        combined_feature: list[str] = [str(0)] * input_dataframe.shape[0]
-        for feature in new_combination:
-            tmp_feature = input_dataframe[feature].tolist()
-            for enx, el in enumerate(tmp_feature):
-                combined_feature[enx] = str(
-                    internal_hash(
-                        str(combined_feature[enx]) + str(el),
-                    ),
-                )
-        ftr_name = join_string.join(str(x) for x in new_combination)
+        combined_feature, ftr_name = compute_combined_feature(input_dataframe, new_combination, join_string)
+
         new_feature_hash[ftr_name] = combined_feature
         com_counter += 1
+
     tmp_df = pd.DataFrame(new_feature_hash)
     pbar.set_description('Concatenating into final frame ..')
     input_dataframe = pd.concat([input_dataframe, tmp_df], axis=1)
     del tmp_df
 
     return input_dataframe
+
+
+def compute_combined_feature(
+    input_dataframe: pd.DataFrame,
+    new_combination: tuple[str, ...],
+    join_string: str,
+) -> tuple[list[str], str]:
+
+    combined_series = np.zeros(input_dataframe.shape[0])
+
+    for feature in new_combination:
+        combined_series += input_dataframe[feature].values
+
+    combined_feature = combined_series.tolist()
+
+    ftr_name = join_string.join(new_combination)
+
+    return combined_feature, ftr_name
 
 
 def compute_expanded_multivalue_features(
