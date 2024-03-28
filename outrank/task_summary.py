@@ -37,9 +37,10 @@ def outrank_task_result_summary(args):
 
     min_score = np.min(final_df[f'Score {args.heuristic}'].values)
     max_score = np.max(final_df[f'Score {args.heuristic}'].values)
-    final_df[f'Score {args.heuristic}'] = (
-        final_df[f'Score {args.heuristic}'] - min_score
-    ) / (max_score - min_score)
+    if "MI" in args.heuristic:
+        final_df[f'Score {args.heuristic}'] = (
+            final_df[f'Score {args.heuristic}'] - min_score
+        ) / (max_score - min_score)
     logging.info(f'Storing summary files to {args.output_folder}')
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     singles_path = os.path.join(args.output_folder, 'feature_singles.tsv')

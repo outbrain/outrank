@@ -51,9 +51,10 @@ MAX_FEATURES_3MR = 10 ** 4
 def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) -> list[tuple[Any, ...]]:
     """Make sure only relevant subspace of combinations is selected based on prior counts"""
 
-    if len(GLOBAL_PRIOR_COMB_COUNTS) == 0:
-        for combination in combinations:
-            GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
+    missing_combinations = set(set(combinations)).difference(GLOBAL_PRIOR_COMB_COUNTS.keys())
+    if len(missing_combinations) > 0:
+        for combination in missing_combinations:
+            GLOBAL_PRIOR_COMB_COUNTS[combination] = 0
         tmp = combinations[:args.combination_number_upper_bound]
     else:
         tmp = list(x[0] for x in sorted(GLOBAL_PRIOR_COMB_COUNTS.items(), key=lambda x:x[1], reverse=False))[:args.combination_number_upper_bound]
@@ -121,16 +122,9 @@ def mixed_rank_graph(
     if is_prior_heuristic(args):
         reference_model_features = [(" AND ").join(tuple(sorted(item.split(",")))) for item in extract_features_from_reference_JSON(args.reference_model_JSON, all_features=True)]
         combinations = [comb for comb in combinations if comb[0] not in reference_model_features and comb[1] not in reference_model_features]
-        print(combinations)
-        print("\n\n")
 
     combinations = prior_combinations_sample(combinations, args)
-    print(GLOBAL_PRIOR_COMB_COUNTS)
-    print(combinations)
-    print("\n\n")
     random.shuffle(combinations)
-    print(combinations)
-    print("\n\n")
 
     if args.heuristic == 'Constant':
         final_constant_imp = []
@@ -206,16 +200,18 @@ def compute_combined_features(
     model_combinations = []
     full_combination_space = []
 
-    if args.reference_model_JSON != '':
-        model_combinations = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only = True)
-        model_combinations = [tuple(sorted(combination.split(','))) for combination in model_combinations]
-        full_combination_space = model_combinations
 
     if args.interaction_order > 1:
             full_combination_space = list(
                 itertools.combinations(all_columns, interaction_order),
             )
     full_combination_space = prior_combinations_sample(full_combination_space, args)
+
+    if args.reference_model_JSON != '':
+        model_combinations = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only = True)
+        model_combinations = [tuple(sorted(combination.split(','))) for combination in model_combinations]
+        if not is_prior_heuristic(args):
+            full_combination_space = model_combinations
 
     if is_prior_heuristic(args):
         full_combination_space = full_combination_space + [tuple for tuple in model_combinations if tuple not in full_combination_space]
@@ -243,7 +239,7 @@ def compute_combined_features(
     pbar.set_description('Concatenating into final frame ..')
     input_dataframe = pd.concat([input_dataframe, tmp_df], axis=1)
     del tmp_df
-    
+
     return input_dataframe
 
 
