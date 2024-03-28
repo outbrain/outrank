@@ -57,19 +57,15 @@ def sklearn_surrogate(
         vector_first = vector_third
         del vector_third
 
-    unique_values, counts = np.unique(vector_second, return_counts=True)
-
     if X.size <= 1:
-        vector_first = transf.fit_transform(vector_first.reshape(-1, 1))
-        estimate_feature_importance_list = cross_val_score(
-            clf, vector_first, vector_second, scoring='neg_log_loss', cv=num_folds,
-        )
+        X = vector_first.reshape(-1, 1)
     else:
         X = np.concatenate((X, vector_first.reshape(-1, 1)), axis=1)
-        X = transf.fit_transform(X)
-        estimate_feature_importance_list = cross_val_score(
-            clf, X, vector_second, scoring='neg_log_loss', cv=num_folds,
-        )   
+
+    X = transf.fit_transform(X)
+    estimate_feature_importance_list = cross_val_score(
+        clf, X, vector_second, scoring='neg_log_loss', cv=num_folds,
+    )
     estimate_feature_importance = 1 + \
         np.median(estimate_feature_importance_list)        
 
