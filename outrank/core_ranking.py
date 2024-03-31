@@ -186,7 +186,6 @@ def enrich_with_transformations(
 
 def compute_combined_features(
     input_dataframe: pd.DataFrame,
-    logger: Any,
     args: Any,
     pbar: Any,
     is_3mr: bool = False,
@@ -547,7 +546,7 @@ def compute_batch_ranking(
     if args.interaction_order > 1 or args.reference_model_JSON:
         pbar.set_description('Constructing new features')
         input_dataframe = compute_combined_features(
-            input_dataframe, logger, args, pbar,
+            input_dataframe, args, pbar,
         )
 
     # in case of 3mr we compute the score of combinations against the target
@@ -556,7 +555,7 @@ def compute_batch_ranking(
             'Constructing features for computing relations in 3mr',
         )
         input_dataframe = compute_combined_features(
-            input_dataframe, logger, args, pbar, True,
+            input_dataframe, args, pbar, True,
         )
 
     if args.include_noise_baseline_features == 'True' and args.heuristic != 'Constant':
