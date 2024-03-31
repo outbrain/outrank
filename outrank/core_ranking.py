@@ -51,13 +51,15 @@ MAX_FEATURES_3MR = 10 ** 4
 def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) -> list[tuple[Any, ...]]:
     """Make sure only relevant subspace of combinations is selected based on prior counts"""
 
+    if len(combinations) == 0:
+        return []
+
     missing_combinations = set(set(combinations)).difference(GLOBAL_PRIOR_COMB_COUNTS.keys())
     if len(missing_combinations) > 0:
         for combination in missing_combinations:
             GLOBAL_PRIOR_COMB_COUNTS[combination] = 0
-        tmp = combinations[:args.combination_number_upper_bound]
-    else:
-        tmp = list(x[0] for x in sorted(GLOBAL_PRIOR_COMB_COUNTS.items(), key=lambda x:x[1], reverse=False))[:args.combination_number_upper_bound]
+
+    tmp = sorted(combinations, key=GLOBAL_PRIOR_COMB_COUNTS.get, reverse=False)[:args.combination_number_upper_bound]
 
     for combination in tmp:
         GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
