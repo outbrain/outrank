@@ -40,5 +40,6 @@ def conduct_self_test():
 
     logger.info('All tests passed, OutRank seems in shape \N{winking face}')
 
+
 if __name__ == '__main__':
     conduct_self_test()
