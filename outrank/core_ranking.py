@@ -32,6 +32,7 @@ from outrank.core_utils import generic_line_parser
 from outrank.core_utils import internal_hash
 from outrank.core_utils import NominalFeatureSummary
 from outrank.core_utils import NumericFeatureSummary
+from outrank.core_utils import is_prior_heuristic
 from outrank.feature_transformations.ranking_transformers import FeatureTransformerGeneric
 from outrank.feature_transformations.ranking_transformers import FeatureTransformerNoise
 
@@ -50,12 +51,15 @@ MAX_FEATURES_3MR = 10 ** 4
 def prior_combinations_sample(combinations: list[tuple[Any, ...]], args: Any) -> list[tuple[Any, ...]]:
     """Make sure only relevant subspace of combinations is selected based on prior counts"""
 
-    if len(GLOBAL_PRIOR_COMB_COUNTS) == 0:
-        for combination in combinations:
-            GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
-        tmp = combinations[:args.combination_number_upper_bound]
-    else:
-        tmp = list(x[0] for x in sorted(GLOBAL_PRIOR_COMB_COUNTS.items(), key=lambda x:x[1], reverse=False))[:args.combination_number_upper_bound]
+    if len(combinations) == 0:
+        return []
+
+    missing_combinations = set(set(combinations)).difference(GLOBAL_PRIOR_COMB_COUNTS.keys())
+    if len(missing_combinations) > 0:
+        for combination in missing_combinations:
+            GLOBAL_PRIOR_COMB_COUNTS[combination] = 0
+
+    tmp = sorted(combinations, key=GLOBAL_PRIOR_COMB_COUNTS.get, reverse=False)[:args.combination_number_upper_bound]
 
     for combination in tmp:
         GLOBAL_PRIOR_COMB_COUNTS[combination] += 1
@@ -115,6 +119,12 @@ def mixed_rank_graph(
     out_time_struct['encoding_columns'] = end_enc_timer - start_enc_timer
 
     combinations = get_combinations_from_columns(all_columns, args)
+
+    reference_model_features = {}
+    if is_prior_heuristic(args):
+        reference_model_features = [(" AND ").join(tuple(sorted(item.split(",")))) for item in extract_features_from_reference_JSON(args.reference_model_JSON, all_features=True)]
+        combinations = [comb for comb in combinations if comb[0] not in reference_model_features and comb[1] not in reference_model_features]
+
     combinations = prior_combinations_sample(combinations, args)
     random.shuffle(combinations)
 
@@ -132,7 +142,7 @@ def mixed_rank_graph(
 
     # starmap is an alternative that is slower unfortunately (but nicer)
     def get_grounded_importances_estimate(combination: tuple[str]) -> Any:
-        return get_importances_estimate_pairwise(combination, args, tmp_df=tmp_df)
+        return get_importances_estimate_pairwise(combination, reference_model_features, args, tmp_df=tmp_df)
 
     start_enc_timer = timer()
     with cpu_pool as p:
@@ -176,7 +186,6 @@ def enrich_with_transformations(
 
 def compute_combined_features(
     input_dataframe: pd.DataFrame,
-    logger: Any,
     args: Any,
     pbar: Any,
     is_3mr: bool = False,
@@ -189,19 +198,25 @@ def compute_combined_features(
     join_string = ' AND_REL ' if is_3mr else ' AND '
     interaction_order = 2 if is_3mr else args.interaction_order
 
-    if args.reference_model_JSON != '':
-        combined_features = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only = True)
-        full_combination_space = [combination.split(',') for combination in combined_features]
-    else:
-        full_combination_space = list(
-            itertools.combinations(all_columns, interaction_order),
-        )
+    model_combinations = []
+    full_combination_space = []
 
-    if args.combination_number_upper_bound and args.reference_model_JSON != '':
-        random.shuffle(full_combination_space)
-        full_combination_space = full_combination_space[
-            : args.combination_number_upper_bound
-        ]
+
+    if args.interaction_order > 1:
+            full_combination_space = list(
+                itertools.combinations(all_columns, interaction_order),
+            )
+    full_combination_space = prior_combinations_sample(full_combination_space, args)
+
+    if args.reference_model_JSON != '':
+        model_combinations = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only = True)
+        model_combinations = [tuple(sorted(combination.split(','))) for combination in model_combinations]
+        if not is_prior_heuristic(args):
+            full_combination_space = model_combinations
+
+    if is_prior_heuristic(args):
+        full_combination_space = full_combination_space + [tuple for tuple in model_combinations if tuple not in full_combination_space]
+
 
     com_counter = 0
     new_feature_hash = {}
@@ -531,7 +546,7 @@ def compute_batch_ranking(
     if args.interaction_order > 1 or args.reference_model_JSON:
         pbar.set_description('Constructing new features')
         input_dataframe = compute_combined_features(
-            input_dataframe, logger, args, pbar,
+            input_dataframe, args, pbar,
         )
 
     # in case of 3mr we compute the score of combinations against the target
@@ -540,7 +555,7 @@ def compute_batch_ranking(
             'Constructing features for computing relations in 3mr',
         )
         input_dataframe = compute_combined_features(
-            input_dataframe, logger, args, pbar, True,
+            input_dataframe, args, pbar, True,
         )
 
     if args.include_noise_baseline_features == 'True' and args.heuristic != 'Constant':

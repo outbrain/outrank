@@ -82,7 +82,7 @@ class CompareStrategiesTest(unittest.TestCase):
         random_df.columns = ['F1', 'F2', 'F3']
         local_pbar = tqdm.tqdm(total=100, position=0)
         transformed_df = compute_combined_features(
-            random_df, None, args, local_pbar,
+            random_df, args, local_pbar,
         )
         self.assertEqual(transformed_df.shape[1], 4)
 
@@ -91,7 +91,7 @@ class CompareStrategiesTest(unittest.TestCase):
         random_df = pd.DataFrame(random_matrix)
         random_df.columns = ['F1', 'F2', 'F3']
         transformed_df = compute_combined_features(
-            random_df, None, args, local_pbar,
+            random_df, args, local_pbar,
         )
         self.assertEqual(transformed_df.shape[1], 6)
 
