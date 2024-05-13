@@ -1,5 +1,5 @@
 flake8>=6.1.0
-flux==1.3.5
+flax==1.3.5
 jax==0.4.28
 jaxlib==0.4.28
 matplotlib>=3.7.2
