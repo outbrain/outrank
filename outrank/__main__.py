@@ -5,6 +5,7 @@ import json
 import logging
 
 from outrank.task_generators import outrank_task_generate_data_set
+from outrank.task_instance_ranking import outrank_task_rank_instances
 from outrank.task_ranking import outrank_task_conduct_ranking
 from outrank.task_selftest import conduct_self_test
 from outrank.task_summary import outrank_task_result_summary
@@ -275,6 +276,9 @@ def main():
 
         elif task == 'data_generator':
             outrank_task_generate_data_set(args)
+
+        elif task == 'instance_ranking':
+            outrank_task_rank_instances(args)
 
         else:
             logging.info(f'Warning, the selected task: {task} does not exist.')

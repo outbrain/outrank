@@ -29,10 +29,11 @@ from outrank.algorithms.sketches.counting_ultiloglog import (
 from outrank.core_utils import BatchRankingSummary
 from outrank.core_utils import extract_features_from_reference_JSON
 from outrank.core_utils import generic_line_parser
+from outrank.core_utils import get_num_of_instances
 from outrank.core_utils import internal_hash
+from outrank.core_utils import is_prior_heuristic
 from outrank.core_utils import NominalFeatureSummary
 from outrank.core_utils import NumericFeatureSummary
-from outrank.core_utils import is_prior_heuristic
 from outrank.feature_transformations.ranking_transformers import FeatureTransformerGeneric
 from outrank.feature_transformations.ranking_transformers import FeatureTransformerNoise
 
@@ -122,7 +123,7 @@ def mixed_rank_graph(
 
     reference_model_features = {}
     if is_prior_heuristic(args):
-        reference_model_features = [(" AND ").join(tuple(sorted(item.split(",")))) for item in extract_features_from_reference_JSON(args.reference_model_JSON, all_features=True)]
+        reference_model_features = [(' AND ').join(tuple(sorted(item.split(',')))) for item in extract_features_from_reference_JSON(args.reference_model_JSON, all_features=True)]
         combinations = [comb for comb in combinations if comb[0] not in reference_model_features and comb[1] not in reference_model_features]
 
     combinations = prior_combinations_sample(combinations, args)
@@ -587,21 +588,6 @@ def compute_batch_ranking(
         coverage_storage,
         feature_memory_consumption,
     )
-
-
-def get_num_of_instances(fname: str) -> int:
-    """Count the number of lines in a file, fast - useful for progress logging"""
-
-    def _make_gen(reader):
-        while True:
-            b = reader(2**16)
-            if not b:
-                break
-            yield b
-
-    with open(fname, 'rb') as f:
-        count = sum(buf.count(b'\n') for buf in _make_gen(f.raw.read))
-    return count
 
 
 def get_grouped_df(importances_df_list: list[tuple[str, str, float]]) -> pd.DataFrame:
