@@ -59,7 +59,7 @@ def outrank_task_rank_instances(args: Any) -> None:
     )
     local_pbar.set_description('Starting ranking computation')
 
-    file_name, file_extension = os.path.splitext(dataset_info.data_path)
+    _, file_extension = os.path.splitext(dataset_info.data_path)
 
     if file_extension == '.gz':
         file_stream = gzip.open(
