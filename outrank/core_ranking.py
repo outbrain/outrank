@@ -21,11 +21,12 @@ import numpy as np
 import pandas as pd
 import tqdm
 
-from outrank.algorithms.importance_estimator import get_importances_estimate_pairwise
-from outrank.algorithms.sketches.counting_counters_ordinary import PrimitiveConstrainedCounter
-from outrank.algorithms.sketches.counting_ultiloglog import (
-    HyperLogLogWCache as HyperLogLog,
-)
+from outrank.algorithms.importance_estimator import \
+    get_importances_estimate_pairwise
+from outrank.algorithms.sketches.counting_counters_ordinary import \
+    PrimitiveConstrainedCounter
+from outrank.algorithms.sketches.counting_ultiloglog import \
+    HyperLogLogWCache as HyperLogLog
 from outrank.core_utils import BatchRankingSummary
 from outrank.core_utils import extract_features_from_reference_JSON
 from outrank.core_utils import generic_line_parser

@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from outrank.feature_transformations.feature_transformer_vault.default_transformers import (
-    DEFAULT_TRANSFORMERS,
-)
+from outrank.feature_transformations.feature_transformer_vault.default_transformers import \
+    DEFAULT_TRANSFORMERS
 
 FW_TRANSFORMERS = DEFAULT_TRANSFORMERS.copy()
 resolution_range = [1, 10, 50, 100]

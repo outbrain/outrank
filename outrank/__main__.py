@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 
 from outrank.task_generators import outrank_task_generate_data_set

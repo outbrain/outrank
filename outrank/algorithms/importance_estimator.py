@@ -11,14 +11,14 @@ import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
 from sklearn.feature_selection import mutual_info_classif
-from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import adjusted_mutual_info_score
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
 
 from outrank.core_utils import is_prior_heuristic
-
 
 logger = logging.getLogger('syn-logger')
 logger.setLevel(logging.DEBUG)
@@ -43,11 +43,11 @@ def sklearn_MI(vector_first: Any, vector_second: Any) -> float:
 
 
 def sklearn_surrogate(
-    vector_first: Any, vector_second: Any, X: Any, surrogate_model: str
+    vector_first: Any, vector_second: Any, X: Any, surrogate_model: str,
 ) -> float:
-    
+
     clf = initialize_classifier(surrogate_model)
-    
+
     transf = OneHotEncoder()
 
     # They do not commute, swap if needed
@@ -67,7 +67,7 @@ def sklearn_surrogate(
         clf, X, vector_second, scoring='neg_log_loss', cv=num_folds,
     )
     estimate_feature_importance = 1 + \
-        np.median(estimate_feature_importance_list)        
+        np.median(estimate_feature_importance_list)
 
     return estimate_feature_importance
 
@@ -127,7 +127,7 @@ def get_importances_estimate_pairwise(combination, reference_model_features, arg
             X = tmp_df[reference_model_features].values
 
         estimate_feature_importance = sklearn_surrogate(
-            vector_first, vector_second, X, args.heuristic
+            vector_first, vector_second, X, args.heuristic,
         )
 
     elif 'MI-numba' in args.heuristic:
