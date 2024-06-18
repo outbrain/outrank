@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import gzip
-import logging
 import os
 from collections import Counter
 from collections import defaultdict
@@ -21,13 +20,13 @@ except:
     pass
 
 
-def shannon_ent(string):
+def shannon_ent(string: str) -> float:
     counts = Counter(string)
     frequencies = ((i / len(string)) for i in counts.values())
     return -np.sum(f * np.log2(f) for f in frequencies)
 
 
-def compute_entropy_avg(line):
+def compute_entropy_avg(line: list) -> float:
     joint_ent = 0
     for field in line:
         joint_ent += shannon_ent(field)
@@ -95,7 +94,6 @@ def outrank_task_rank_instances(args: Any) -> None:
         os.makedirs(args.output_folder, exist_ok=True)
         for col in out_df.columns:
             sorted_vals = out_df[col].sort_values()
-            enx = list(range(out_df.shape[0]))
             plt.figure(figsize=(5, 5), dpi=300)
             plt.title(col + f' label: {label}')
             plt.hist(
@@ -104,7 +102,7 @@ def outrank_task_rank_instances(args: Any) -> None:
                 density=True,
                 bins=100,
             )
-            if not 'entropy' in col:
+            if 'entropy' not in col:
                 plt.xlabel('Proportion of namespaces (%)')
             else:
                 plt.xlabel('Row entropy')
