@@ -3,9 +3,8 @@ from __future__ import annotations
 import sys
 import unittest
 
-from outrank.algorithms.sketches.counting_ultiloglog import (
-    HyperLogLogWCache as HyperLogLog,
-)
+from outrank.algorithms.sketches.counting_ultiloglog import \
+    HyperLogLogWCache as HyperLogLog
 
 sys.path.append('./outrank')
 

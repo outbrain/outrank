@@ -5,9 +5,8 @@ import unittest
 
 import numpy as np
 
-from outrank.feature_transformations.feature_transformer_vault.fw_transformers import (
-    FW_TRANSFORMERS,
-)
+from outrank.feature_transformations.feature_transformer_vault.fw_transformers import \
+    FW_TRANSFORMERS
 
 sys.path.append('./outrank')
 

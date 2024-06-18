@@ -647,7 +647,21 @@ def summarize_rare_counts(
 
 
 def is_prior_heuristic(args: Any) -> bool:
-    if "-prior" in args.heuristic and args.reference_model_JSON:
+    if '-prior' in args.heuristic and args.reference_model_JSON:
         return True
     return False
 
+
+def get_num_of_instances(fname: str) -> int:
+    """Count the number of lines in a file, fast - useful for progress logging"""
+
+    def _make_gen(reader):
+        while True:
+            b = reader(2**16)
+            if not b:
+                break
+            yield b
+
+    with open(fname, 'rb') as f:
+        count = sum(buf.count(b'\n') for buf in _make_gen(f.raw.read))
+    return count

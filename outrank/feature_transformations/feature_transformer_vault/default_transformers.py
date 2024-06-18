@@ -1,5 +1,6 @@
 # Some boilerplate transformations people tend to use
 from __future__ import annotations
+
 MINIMAL_TRANSFORMERS = {
     '_tr_sqrt': 'np.sqrt(X)',
     '_tr_log(x+1)': 'np.log(X + 1)',

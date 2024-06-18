@@ -5,9 +5,8 @@ import unittest
 
 import numpy as np
 
-from outrank.algorithms.feature_ranking.ranking_mi_numba import (
-    mutual_info_estimator_numba,
-)
+from outrank.algorithms.feature_ranking.ranking_mi_numba import \
+    mutual_info_estimator_numba
 
 np.random.seed(123)
 sys.path.append('./outrank')

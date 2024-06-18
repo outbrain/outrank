@@ -6,6 +6,7 @@ import sys
 
 import matplotlib.pyplot as plt
 
+
 def extract_just_ranking(dfile):
     """Extract ranking from an output file."""
     ranks = []
