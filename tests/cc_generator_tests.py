@@ -157,9 +157,6 @@ class TestCategoricalClassification(unittest.TestCase):
 
     def test_generate_labels_class_relation_cluster(self):
         X = self.cc_instance.generate_data(n_features=5, n_samples=100)
-        labels = self.cc_instance.generate_labels(X, class_relation='cluster', balance=True)
+        labels = self.cc_instance.generate_labels(X, class_relation='cluster')
         self.assertIsInstance(labels, np.ndarray, 'Output should be a numpy array')
         self.assertEqual(labels.shape, (100,), 'Shape should be (n_samples,)')
-
-if __name__ == '__main__':
-    unittest.main()
