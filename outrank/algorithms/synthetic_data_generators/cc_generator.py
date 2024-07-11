@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from typing import List
+from typing import Literal
 from typing import Optional
 from typing import Tuple
 from typing import Union
 
 import numpy as np
+from numpy.typing import ArrayLike
 from scipy.linalg import qr
 from scipy.stats import norm
 from sklearn.cluster import KMeans
@@ -32,7 +34,7 @@ class CategoricalClassification:
         n_features: int,
         n_samples: int,
         cardinality: int = 5,
-        structure: list | np.ndarray | None = None,
+        structure: list | ArrayLike | None = None,
         ensure_rep: bool = False,
         random_values: bool | None = False,
         low: int | None = 0,
@@ -41,7 +43,7 @@ class CategoricalClassification:
     ) -> np.ndarray:
 
         """
-        Generates dataset based on parameters
+        Generates dataset based on given parameters
         :param n_features: number of generated features
         :param n_samples: number of generated samples
         :param cardinality: default cardinality of the dataset
@@ -102,7 +104,7 @@ class CategoricalClassification:
                             X[ix] = x
                             ix += 1
 
-                    x = self._feature_builder(
+                    x = self._configure_generate_feature(
                         feature_attributes,
                         n_samples,
                         ensure_rep=ensure_rep,
@@ -115,8 +117,7 @@ class CategoricalClassification:
 
                 else:
                     # Data in structure is a tuple of (list of feature indexes, feature attributes)
-                    feature_ixs = data[0]
-                    feature_attributes = data[1]
+                    feature_ixs, feature_attributes = data
 
                     for feature_ix in feature_ixs:
                         # Filling out the dataset up to feature_ix
@@ -133,7 +134,7 @@ class CategoricalClassification:
                                 X[ix] = x
                                 ix += 1
 
-                        x = self._feature_builder(
+                        x = self._configure_generate_feature(
                             feature_attributes,
                             n_samples,
                             ensure_rep=ensure_rep,
@@ -160,9 +161,9 @@ class CategoricalClassification:
 
         return X.T
 
-    def _feature_builder(
+    def _configure_generate_feature(
         self,
-        feature_attributes: int | list | np.ndarray,
+        feature_attributes: int | list | ArrayLike,
         n_samples: int,
         ensure_rep: bool = False,
         random_values: bool | None = False,
@@ -171,7 +172,7 @@ class CategoricalClassification:
     ) -> np.ndarray:
 
         """
-        Helper function to avoid duplicate code, builds feature
+        Helper function, calls _generate_feature with appropriate parameters based on feature_attributes
         :param feature_attributes: either integer (cardinality) or list of feature attributes
         :param n_samples: number of samples in dataset
         :param ensure_rep: ensures all values are represented at least once in the feature vector
@@ -216,7 +217,7 @@ class CategoricalClassification:
     def _generate_feature(
         self,
         size: int,
-        vec: list[int] | np.ndarray | None = None,
+        vec: list[int] | ArrayLike | None = None,
         cardinality: int = 5,
         ensure_rep: bool = False,
         random_values: bool | None = False,
@@ -225,7 +226,7 @@ class CategoricalClassification:
         p: list[float] | np.ndarray | None = None,
     ) -> np.ndarray:
         """
-        Generates feature vector of length size. Default probability density distribution is approx. normal, centred around a randomly picked value.
+        Generates feature vector of length size. Default probability density distribution is approximately normal, centred around a randomly picked value.
         :param vec: list of feature values
         :param cardinality: single value cardinality
         :param size: length of feature vector
@@ -264,10 +265,10 @@ class CategoricalClassification:
 
     def generate_combinations(
         self,
-        X: np.ndarray,
-        feature_indices: list[int] | np.ndarray,
+        X: ArrayLike,
+        feature_indices: list[int] | ArrayLike,
         combination_function: Optional = None,
-        combination_type: str = 'linear',
+        combination_type: Literal = 'linear',
     ) -> np.ndarray:
         """
         Generates linear, nonlinear, or custom combinations within feature vectors in given dataset X
@@ -300,11 +301,10 @@ class CategoricalClassification:
 
         return np.column_stack((X, combination_result))
 
-    def _xor(self, arr):
+    def _xor(self, arr: list[int] | ArrayLike) -> np.ndarray:
         """
         Performs bitwise XOR operation on two integer arrays
-        :param a: array
-        :param b: array
+        :param arr: features to perform XOR operation on
         :return: bitwise XOR result
         """
         arrT = arr.T
@@ -316,11 +316,10 @@ class CategoricalClassification:
 
         return out.T
 
-    def _and(self, arr):
+    def _and(self, arr: list[int] | ArrayLike) -> np.ndarray:
         """
         Performs bitwise AND operation on two integer arrays
-        :param a: array
-        :param b: array
+        :param arr: features to perform AND operation on
         :return: bitwise AND result
         """
         arrT = arr.T
@@ -332,11 +331,10 @@ class CategoricalClassification:
 
         return out.T
 
-    def _or(self, arr):
+    def _or(self, arr: list[int] | ArrayLike) -> np.ndarray:
         """
         Performs bitwise OR operation on two integer arrays
-        :param a: array
-        :param b: array
+        :param arr: features to perform OR operation on
         :return: bitwise OR result
         """
         arrT = arr.T
@@ -350,8 +348,8 @@ class CategoricalClassification:
 
     def generate_correlated(
         self,
-        X: np.ndarray,
-        feature_indices: list[int] | np.ndarray,
+        X: ArrayLike,
+        feature_indices: list[int] | ArrayLike,
         r: float = 0.8,
     ) -> np.ndarray:
 
@@ -408,8 +406,8 @@ class CategoricalClassification:
 
     def generate_duplicates(
         self,
-        X: np.ndarray,
-        feature_indices: list[int] | np.ndarray,
+        X: ArrayLike,
+        feature_indices: list[int] | ArrayLike,
     ) -> np.ndarray:
         """
         Generates duplicate features
@@ -433,9 +431,9 @@ class CategoricalClassification:
 
     def generate_labels(
         self,
-        X: np.ndarray,
+        X: ArrayLike,
         n: int = 2,
-        p: float | list[float] | np.ndarray = 0.5,
+        p: float | list[float] | ArrayLike = 0.5,
         k: int | float = 2,
         decision_function: Optional = None,
         class_relation: str = 'linear',
@@ -528,9 +526,9 @@ class CategoricalClassification:
 
     def _cluster_data(
         self,
-        X: np.ndarray,
+        X: ArrayLike,
         n: int,
-        p: float | list[float] | np.ndarray | None = 1.0,
+        p: float | list[float] | ArrayLike | None = 1.0,
         balance: bool = False,
     ) -> np.ndarray:
         """
@@ -624,10 +622,10 @@ class CategoricalClassification:
 
     def generate_noise(
         self,
-        X: np.ndarray,
-        y: list[int] | np.ndarray,
+        X: ArrayLike,
+        y: list[int] | ArrayLike,
         p: float = 0.2,
-        type: str = 'categorical',
+        type: Literal = 'categorical',
         missing_val: str | int | float = float('-inf'),
     ) -> np.ndarray:
 
@@ -718,12 +716,12 @@ class CategoricalClassification:
 
     def downsample_dataset(
         self,
-        X: np.array,
-        y: list[int] | np.ndarray,
-        N: int | None | None = None,
+        X: ArrayLike,
+        y: list[int] | ArrayLike,
+        N: int | None = None,
         seed: int = 42,
         reshuffle: bool = False,
-    ) -> tuple[np.array, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray]:
 
         """
         Downsamples dataset X according to N or the number of samples in minority class, resulting in a balanced dataset.
@@ -777,7 +775,11 @@ class CategoricalClassification:
 
         return X_downsampled, y_downsampled
 
-    def print_dataset(self, X, y):
+    def print_dataset(
+        self,
+        X: ArrayLike,
+        y: ArrayLike,
+    ):
         """
         Prints given dataset
         :param X: dataset
@@ -803,7 +805,7 @@ class CategoricalClassification:
         print(f"Number of generated samples: {self.dataset_info['general']['n_samples']}")
         if self.dataset_info['downsampling']:
             print(
-                f"Dataset downsampled from shape {self.dataset_info['downsampling']['original_shape']},to shape {self.dataset_info['downsampling']['downsampled_shape']}",
+                f"Dataset downsampled from shape {self.dataset_info['downsampling']['original_shape']}, to shape {self.dataset_info['downsampling']['downsampled_shape']}",
             )
         print(f"Number of classes: {self.dataset_info['labels']['n_class']}")
         print(f"Class relation: {self.dataset_info['labels']['class_relation']}")
