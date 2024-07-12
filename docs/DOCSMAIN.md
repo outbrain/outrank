@@ -64,3 +64,23 @@ scores = [lowest_score, medium_score, high_score]
 sorted_score_indices = np.argsort(scores)
 assert np.sum(np.array([0, 1, 2]) - sorted_score_indices) ==  0
 ```
+---
+## Creating a simple dataset 
+```python
+from outrank.algorithms.synthetic_data_generators.cc_generator import CategoricalClassification
+
+cc = CategoricalClassification()
+
+# Creates a simple dataset of 10 features, 10k samples, with feature cardinality of all features being 35
+X = cc.generate_data(9, 
+                     10000, 
+                     cardinality=35, 
+                     ensure_rep=True, 
+                     random_values=True, 
+                     low=0, 
+                     high=40)
+
+# Creates target labels via clustering
+y = cc.generate_labels(X, n=2, class_relation='cluster')
+
+```
