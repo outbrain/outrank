@@ -22,7 +22,7 @@ class CategoricalClassification:
             'combinations': [],
             'correlations': [],
             'duplicates': [],
-            'labels': [],
+            'labels': {},
             'noise': [],
         }
 
@@ -268,7 +268,7 @@ class CategoricalClassification:
         X: ArrayLike,
         feature_indices: list[int] | ArrayLike,
         combination_function: Optional = None,
-        combination_type: Literal = 'linear',
+        combination_type: Literal['linear', 'nonlinear'] = 'linear',
     ) -> np.ndarray:
         """
         Generates linear, nonlinear, or custom combinations within feature vectors in given dataset X
@@ -436,7 +436,7 @@ class CategoricalClassification:
         p: float | list[float] | ArrayLike = 0.5,
         k: int | float = 2,
         decision_function: Optional = None,
-        class_relation: str = 'linear',
+        class_relation: Literal['linear', 'nonlinear', 'cluster'] = 'linear',
         balance: bool = False,
     ):
         """
@@ -625,7 +625,7 @@ class CategoricalClassification:
         X: ArrayLike,
         y: list[int] | ArrayLike,
         p: float = 0.2,
-        type: Literal = 'categorical',
+        type: Literal['categorical', 'missing'] = 'categorical',
         missing_val: str | int | float = float('-inf'),
     ) -> np.ndarray:
 
@@ -713,6 +713,9 @@ class CategoricalClassification:
                     feature[ix] = missing_val
 
             return Xn_T.T
+
+        else:
+            raise ValueError(f'Type {type} not supported')
 
     def downsample_dataset(
         self,
@@ -803,12 +806,13 @@ class CategoricalClassification:
 
         print(f"Number of features: {self.dataset_info['general']['n_features']}")
         print(f"Number of generated samples: {self.dataset_info['general']['n_samples']}")
-        if self.dataset_info['downsampling']:
+        if 'downsampling' in self.dataset_info:
             print(
                 f"Dataset downsampled from shape {self.dataset_info['downsampling']['original_shape']}, to shape {self.dataset_info['downsampling']['downsampled_shape']}",
             )
-        print(f"Number of classes: {self.dataset_info['labels']['n_class']}")
-        print(f"Class relation: {self.dataset_info['labels']['class_relation']}")
+        if 'n_class' in self.dataset_info['labels']:
+            print(f"Number of classes: {self.dataset_info['labels']['n_class']}")
+            print(f"Class relation: {self.dataset_info['labels']['class_relation']}")
 
         print('-------------------------------------')
 
