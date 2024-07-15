@@ -16,13 +16,14 @@ from sklearn.utils import resample
 
 class CategoricalClassification:
 
-    def __init__(self):
+    def __init__(self, seed: int = 42):
+        np.random.seed(seed)
         self.dataset_info = {
             'general': {},
             'combinations': [],
             'correlations': [],
             'duplicates': [],
-            'labels': [],
+            'labels': {},
             'noise': [],
         }
 
@@ -70,8 +71,8 @@ class CategoricalClassification:
         np.random.seed(seed)
         X = np.empty([n_features, n_samples])
 
+        # No specific structure parameter passed
         if structure is None:
-            # No specific structure parameter passed
             for i in range(n_features):
                 x = self._generate_feature(
                     n_samples,
@@ -82,16 +83,17 @@ class CategoricalClassification:
                     high=high,
                 )
                 X[i] = x
+        # Structure parameter passed, building based on structure
         else:
-            # Structure parameter passed, building based on structure
             ix = 0
             for data in structure:
+
+                # Data in structure is a tuple of (feature index (integer), feature attributes)
                 if not isinstance(data[0], (list, np.ndarray)):
-                    # Data in structure is a tuple of (feature index (integer), feature attributes)
                     feature_ix, feature_attributes = data
 
+                    # Filling out the dataset up to column index feature_ix
                     if ix < feature_ix:
-                        # Filling out the dataset up to column index feature_ix
                         for i in range(ix, feature_ix):
                             x = self._generate_feature(
                                 n_samples,
@@ -115,12 +117,12 @@ class CategoricalClassification:
                     X[ix] = x
                     ix += 1
 
+                # Data in structure is a tuple of (list of feature indexes, feature attributes)
                 else:
-                    # Data in structure is a tuple of (list of feature indexes, feature attributes)
                     feature_ixs, feature_attributes = data
 
+                    # Filling out the dataset up to feature_ix
                     for feature_ix in feature_ixs:
-                        # Filling out the dataset up to feature_ix
                         if ix < feature_ix:
                             for i in range(ix, feature_ix):
                                 x = self._generate_feature(
@@ -146,8 +148,8 @@ class CategoricalClassification:
                         X[ix] = x
                         ix += 1
 
+            # Fill out the rest of the dataset
             if ix < n_features:
-                # Fill out the rest of the dataset
                 for i in range(ix, n_features):
                     x = self._generate_feature(
                         n_samples,
@@ -182,9 +184,9 @@ class CategoricalClassification:
         :return: feature vector
         """
 
+        # feature_cardinality is just an integer, generate feature either with random values or
+        # [low, low+cardinality]
         if not isinstance(feature_attributes, (list, np.ndarray)):
-            # feature_cardinality is just an integer, generate feature either with random values or
-            # [low, low+cardinality]
             x = self._generate_feature(
                 n_samples,
                 cardinality=feature_attributes,
@@ -193,8 +195,8 @@ class CategoricalClassification:
                 low=low,
                 high=high,
             )
+        # feature_cardinality is a list of [value_domain, value_frequencies]
         else:
-            # feature_cardinality is a list of [value_domain, value_frequencies]
             if isinstance(feature_attributes[0], (list, np.ndarray)):
                 value_domain, value_frequencies = feature_attributes
                 x = self._generate_feature(
@@ -203,8 +205,8 @@ class CategoricalClassification:
                     ensure_rep=ensure_rep,
                     p=value_frequencies,
                 )
+            # feature_cardinality is value_domain (list of values for feature)
             else:
-                # feature_cardinality is value_domain (list of values for feature)
                 value_domain = feature_attributes
                 x = self._generate_feature(
                     n_samples,
@@ -268,7 +270,7 @@ class CategoricalClassification:
         X: ArrayLike,
         feature_indices: list[int] | ArrayLike,
         combination_function: Optional = None,
-        combination_type: Literal = 'linear',
+        combination_type: Literal['linear', 'nonlinear'] = 'linear',
     ) -> np.ndarray:
         """
         Generates linear, nonlinear, or custom combinations within feature vectors in given dataset X
@@ -436,8 +438,9 @@ class CategoricalClassification:
         p: float | list[float] | ArrayLike = 0.5,
         k: int | float = 2,
         decision_function: Optional = None,
-        class_relation: str = 'linear',
+        class_relation: Literal['linear', 'nonlinear', 'cluster'] = 'linear',
         balance: bool = False,
+        random_state: int = 42,
     ):
         """
         Generates labels for dataset X
@@ -448,6 +451,7 @@ class CategoricalClassification:
         :param decision_function: optional user-defined decision function
         :param class_relation: string, either 'linear', 'nonlinear', or 'cluster'
         :param balance: boolean, whether to balance clustering class labels
+        :param random_state: seed for KMeans clustering, defaults to 42
         :return: array of labels, corresponding to dataset X
         """
 
@@ -513,7 +517,7 @@ class CategoricalClassification:
                 p = 1.0
             else:
                 p = [p, 1 - p]
-            y = self._cluster_data(X, n, p=p, balance=balance)
+            y = self._cluster_data(X, n, p=p, balance=balance, random_state=random_state)
 
         self.dataset_info.update({
             'labels': {
@@ -530,6 +534,7 @@ class CategoricalClassification:
         n: int,
         p: float | list[float] | ArrayLike | None = 1.0,
         balance: bool = False,
+        random_state: int = 42,
     ) -> np.ndarray:
         """
         Cluster data using kmeans
@@ -537,16 +542,18 @@ class CategoricalClassification:
         :param n: number of clusters
         :param p: class distribution
         :param balance: balance the clusters according to p
+        :random_state: seed for KMeans clustering, defaults to 42
         :return: array of labels, corresponding to dataset X
         """
 
-        kmeans = KMeans(n_clusters=n)
+        kmeans = KMeans(n_clusters=n, random_state=random_state)
 
         kmeans.fit(X)
 
         cluster_labels = kmeans.labels_
 
-        if not isinstance(p, (list, np.ndarray)):  # Fully balanced clusters
+        # Fully balanced clusters
+        if not isinstance(p, (list, np.ndarray)):
             samples_per_cluster = [len(X) // n] * n
         else:
             samples = len(X)
@@ -572,10 +579,11 @@ class CategoricalClassification:
                 adjustment = samples_per_cluster[i] - cluster_size
                 adjustments.append(adjustment)
 
-                if adjustment < 0:  # Cluter is too large
-
+                # Cluster is too large
+                if adjustment < 0:
                     centroid = kmeans.cluster_centers_[i]
-                    dataset_indices = np.where(cluster_labels == i)[0]  # Indices of samples in dataset
+                    # Indices of samples in dataset
+                    dataset_indices = np.where(cluster_labels == i)[0]
                     cluster_samples = np.copy(X[dataset_indices])
 
                     distances = np.linalg.norm(
@@ -625,7 +633,7 @@ class CategoricalClassification:
         X: ArrayLike,
         y: list[int] | ArrayLike,
         p: float = 0.2,
-        type: Literal = 'categorical',
+        type: Literal['categorical', 'missing'] = 'categorical',
         missing_val: str | int | float = float('-inf'),
     ) -> np.ndarray:
 
@@ -714,6 +722,9 @@ class CategoricalClassification:
 
             return Xn_T.T
 
+        else:
+            raise ValueError(f'Type {type} not supported')
+
     def downsample_dataset(
         self,
         X: ArrayLike,
@@ -799,47 +810,7 @@ class CategoricalClassification:
             print(f'], Label: {y[n]}')
             n += 1
 
+    """
     def summarize(self):
-
-        print(f"Number of features: {self.dataset_info['general']['n_features']}")
-        print(f"Number of generated samples: {self.dataset_info['general']['n_samples']}")
-        if self.dataset_info['downsampling']:
-            print(
-                f"Dataset downsampled from shape {self.dataset_info['downsampling']['original_shape']}, to shape {self.dataset_info['downsampling']['downsampled_shape']}",
-            )
-        print(f"Number of classes: {self.dataset_info['labels']['n_class']}")
-        print(f"Class relation: {self.dataset_info['labels']['class_relation']}")
-
-        print('-------------------------------------')
-
-        if len(self.dataset_info['combinations']) > 0:
-            print('Combinations:')
-            for comb in self.dataset_info['combinations']:
-                print(
-                    f"Features {comb['feature_indices']} are in {comb['combination_type']} combination, result in {comb['combination_ix']}",
-                )
-            print('-------------------------------------')
-
-        if len(self.dataset_info['correlations']) > 0:
-            print('Correlations:')
-            for corr in self.dataset_info['correlations']:
-                print(
-                    f"Features {corr['feature_indices']} are correlated to {corr['correlated_indices']} with a factor of {corr['correlation_factor']}",
-                )
-            print('-------------------------------------')
-
-        if len(self.dataset_info['duplicates']) > 0:
-            print('Duplicates:')
-            for dup in self.dataset_info['duplicates']:
-                print(
-                    f"Features {dup['feature_indices']} are duplicated, duplicate indexes are {dup['duplicate_indices']}",
-                )
-            print('-------------------------------------')
-
-        if len(self.dataset_info['noise']) > 0:
-            print('Simulated noise:')
-            for noise in self.dataset_info['noise']:
-                print(f"Simulated {noise['type']} noise, amount of {noise['noise_amount']}")
-            print('-------------------------------------')
-
-        print("\nFor more information on dataset structure, print cc.dataset_info['general']['structure']")
+        # TODO: Logging function
+    """
