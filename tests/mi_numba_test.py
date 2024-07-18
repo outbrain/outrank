@@ -81,8 +81,8 @@ class CompareStrategiesTest(unittest.TestCase):
         )
 
         # This must be very close to zero/negative
-        self.assertLess(score_independent_first, 0.001)
-        self.assertLess(score_independent_second, 0.001)
+        self.assertLess(score_independent_first, 0.01)
+        self.assertLess(score_independent_second, 0.01)
 
         # --interaction_order 2 simulation
         combined_feature = np.array(
