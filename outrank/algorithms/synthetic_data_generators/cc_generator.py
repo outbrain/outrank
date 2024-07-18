@@ -40,6 +40,7 @@ class CategoricalClassification:
         random_values: bool | None = False,
         low: int | None = 0,
         high: int | None = 1000,
+        k: int | float = 10,
         seed: int = 42,
     ) -> np.ndarray:
 
@@ -53,6 +54,7 @@ class CategoricalClassification:
         :param random_values: flag, enables random (integer) feature values from set [low, high]
         :param low: sets lower bound of random feature values
         :param high: sets high bound of random feature values
+        :param k: scale constant for normal distribution, default 10, sets width of normal distribution, larger value -> narrower peak
         :param seed: sets seed of numpy random
         :return: X, 2D dataset
         """
@@ -69,7 +71,7 @@ class CategoricalClassification:
         })
 
         np.random.seed(seed)
-        X = np.empty([n_features, n_samples])
+        X = np.empty([n_features, n_samples], dtype='int32')
 
         # No specific structure parameter passed
         if structure is None:
@@ -81,6 +83,7 @@ class CategoricalClassification:
                     random_values=random_values,
                     low=low,
                     high=high,
+                    k=k,
                 )
                 X[i] = x
         # Structure parameter passed, building based on structure
@@ -102,6 +105,7 @@ class CategoricalClassification:
                                 random_values=random_values,
                                 low=low,
                                 high=high,
+                                k=k,
                             )
                             X[ix] = x
                             ix += 1
@@ -132,6 +136,7 @@ class CategoricalClassification:
                                     random_values=random_values,
                                     low=low,
                                     high=high,
+                                    k=k,
                                 )
                                 X[ix] = x
                                 ix += 1
@@ -158,6 +163,7 @@ class CategoricalClassification:
                         random_values=random_values,
                         low=low,
                         high=high,
+                        k=k,
                     )
                     X[i] = x
 
@@ -171,6 +177,7 @@ class CategoricalClassification:
         random_values: bool | None = False,
         low: int | None = 0,
         high: int | None = 1000,
+        k: int | float = 10,
     ) -> np.ndarray:
 
         """
@@ -181,6 +188,7 @@ class CategoricalClassification:
         :param random_values: randomly picked values for vec if true, otherwise values range from [low, cardinality] with by 1
         :param low: lower bound of random feature vector values
         :param high: upper bound of random feature vector values
+        :param k: scale constant for normal distribution, default 10, sets width of normal distribution, larger value -> narrower peak
         :return: feature vector
         """
 
@@ -194,6 +202,7 @@ class CategoricalClassification:
                 random_values=random_values,
                 low=low,
                 high=high,
+                k=k,
             )
         # feature_cardinality is a list of [value_domain, value_frequencies]
         else:
@@ -212,6 +221,7 @@ class CategoricalClassification:
                     n_samples,
                     vec=value_domain,
                     ensure_rep=ensure_rep,
+                    k=k,
                 )
 
         return x
@@ -226,6 +236,7 @@ class CategoricalClassification:
         low: int | None = 0,
         high: int | None = 1000,
         p: list[float] | np.ndarray | None = None,
+        k: int | float = 10,
     ) -> np.ndarray:
         """
         Generates feature vector of length size. Default probability density distribution is approximately normal, centred around a randomly picked value.
@@ -237,20 +248,23 @@ class CategoricalClassification:
         :param low: lower bound of random feature vector values
         :param high: upper bound of random feature vector values
         :param p: list of probabilities of each value
+        :param k: scale constant for normal distribution, default 10, sets width of normal distribution, larger value -> narrower peak
         :return: feature vector x
         """
 
         if vec is None:
             if random_values:
-                vec = np.random.choice(range(low, high + 1), cardinality, replace=False)
+                vec = range(low, high + 1)
+                vec = np.random.choice(vec, size=cardinality, replace=False)
             else:
                 vec = np.arange(low, low + cardinality, 1)
         else:
             vec = np.array(vec)
 
+        vec_len = len(vec)
         if p is None:
             v_shift = vec - vec[np.random.randint(len(vec))]
-            p = norm.pdf(v_shift, scale=3)
+            p = norm.pdf(v_shift, scale=vec_len/k)
         else:
             p = np.array(p)
 
@@ -263,7 +277,7 @@ class CategoricalClassification:
             sampled_values = np.random.choice(vec, size=size, p=p)
 
         np.random.shuffle(sampled_values)
-        return sampled_values
+        return sampled_values.astype('int32')
 
     def generate_combinations(
         self,
@@ -309,6 +323,7 @@ class CategoricalClassification:
         :param arr: features to perform XOR operation on
         :return: bitwise XOR result
         """
+        arr = np.array(arr)
         arrT = arr.T
         arrT = arrT.astype(int)
         out = np.bitwise_xor(arrT[0], arrT[1])
@@ -324,9 +339,10 @@ class CategoricalClassification:
         :param arr: features to perform AND operation on
         :return: bitwise AND result
         """
+        arr = np.array(arr)
         arrT = arr.T
         arrT = arrT.astype(int)
-        out = np.bitwise_xor(arrT[0], arrT[1])
+        out = np.bitwise_and(arrT[0], arrT[1])
         if len(arrT) > 2:
             for i in range(2, len(arrT)):
                 out = np.bitwise_and(out, arrT[i])
@@ -339,9 +355,10 @@ class CategoricalClassification:
         :param arr: features to perform OR operation on
         :return: bitwise OR result
         """
+        arr = np.array(arr)
         arrT = arr.T
         arrT = arrT.astype(int)
-        out = np.bitwise_xor(arrT[0], arrT[1])
+        out = np.bitwise_or(arrT[0], arrT[1])
         if len(arrT) > 2:
             for i in range(2, len(arrT)):
                 out = np.bitwise_or(out, arrT[i])
@@ -458,8 +475,7 @@ class CategoricalClassification:
         if isinstance(p, (list, np.ndarray)):
             if sum(p) > 1: raise ValueError('sum of values in must be less than 1.0')
             if len(p) > n: raise ValueError('length of p must equal n')
-
-        if p > 1: raise ValueError('p must be less than 1.0')
+        elif p > 1.0: raise ValueError('p must be less than 1.0')
 
         n_samples, n_features = X.shape
 
@@ -494,22 +510,20 @@ class CategoricalClassification:
 
                     for i in range(1, len(percentiles) - 1):
                         percentiles[i] += percentiles[i - 1]
-
                     percentiles.insert(0, 0)
                     percentiles.pop()
-                    print(percentiles)
 
                     p_points = np.percentile(decision_boundary, percentiles)
-                    print(p_points)
 
                     y = np.zeros_like(decision_boundary, dtype=int)
+
                     for i in range(1, n):
                         p_point = p_points[i]
-                        for j in range(len(decision_boundary)):
-                            if decision_boundary[j] > p_point:
-                                y[j] += 1
+                        y += np.where(decision_boundary > p_point, 1, 0)
             else:
                 decision_boundary = decision_function(X)
+                if isinstance(p, (list, np.ndarray)):
+                    p = p[0]
                 p_point = np.percentile(decision_boundary, p * 100)
                 y = np.where(decision_boundary > p_point, 1, 0)
         else:
@@ -729,7 +743,7 @@ class CategoricalClassification:
         self,
         X: ArrayLike,
         y: list[int] | ArrayLike,
-        N: int | None = None,
+        n: int | None = None,
         seed: int = 42,
         reshuffle: bool = False,
     ) -> tuple[np.ndarray, np.ndarray]:
@@ -738,7 +752,7 @@ class CategoricalClassification:
         Downsamples dataset X according to N or the number of samples in minority class, resulting in a balanced dataset.
         :param X: Dataset to downsample
         :param y: Labels corresponding to X
-        :param N: Optional number of samples per class to downsample to
+        :param n: Optional number of samples per class to downsample to
         :param seed: Seed for random state of resample function
         :param reshuffle: Reshuffle the dataset after downsampling
         :return: Balanced X and y after downsampling
@@ -747,10 +761,10 @@ class CategoricalClassification:
         original_shape = X.shape
 
         values, counts = np.unique(y, return_counts=True)
-        if N is None:
-            N = min(counts)
+        if n is None:
+            n = min(counts)
 
-        if N > min(counts):
+        if n > min(counts):
             raise ValueError('N must be equal to or less than the number of samples in minority class')
 
         X_arrays_list = []
@@ -760,11 +774,11 @@ class CategoricalClassification:
             X_label_downsample = resample(
                 X_label,
                 replace=True,
-                n_samples=N,
+                n_samples=n,
                 random_state=seed,
             )
             X_arrays_list.append(X_label_downsample)
-            ys = [label] * N
+            ys = [label] * n
             y_downsampled = np.concatenate((y_downsampled, ys), axis=0)
 
         X_downsampled = np.concatenate(X_arrays_list, axis=0)
@@ -810,7 +824,4 @@ class CategoricalClassification:
             print(f'], Label: {y[n]}')
             n += 1
 
-    """
-    def summarize(self):
-        # TODO: Logging function
-    """
+    # TODO: Logging function
