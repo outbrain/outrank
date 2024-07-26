@@ -1,7 +1,7 @@
 flake8>=6.1.0
-flax==0.8.3
-jax==0.4.28
-jaxlib==0.4.28
+flax>=0.8.3
+jax>=0.4.28
+jaxlib>=0.4.28
 matplotlib>=3.7.2
 numba>=0.55.1
 numpy>=1.21.6
