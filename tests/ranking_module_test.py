@@ -12,12 +12,10 @@ from pathos.multiprocessing import ProcessingPool as Pool
 from outrank.core_ranking import compute_combined_features
 from outrank.core_ranking import get_combinations_from_columns
 from outrank.core_ranking import mixed_rank_graph
-from outrank.feature_transformations.feature_transformer_vault import (
-    default_transformers,
-)
-from outrank.feature_transformations.ranking_transformers import (
-    FeatureTransformerGeneric,
-)
+from outrank.feature_transformations.feature_transformer_vault import \
+    default_transformers
+from outrank.feature_transformations.ranking_transformers import \
+    FeatureTransformerGeneric
 
 sys.path.append('./outrank')
 
