@@ -18,6 +18,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
 
+from outrank.algorithms.neural.mlp_nn import NNClassifier
 from outrank.core_utils import is_prior_heuristic
 
 logger = logging.getLogger('syn-logger')
@@ -224,6 +225,8 @@ def initialize_classifier(surrogate_model: str):
         return LogisticRegression(max_iter=100000)
     elif 'surrogate-SVM' in surrogate_model:
         return SVC(gamma='auto', probability=True)
+    elif 'surrogate-NN' in surrogate_model:
+        return NNClassifier()
     elif 'surrogate-SGD' in surrogate_model:
         return SGDClassifier(max_iter=100000, loss='log_loss')
     else:
