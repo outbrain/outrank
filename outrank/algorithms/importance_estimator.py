@@ -131,7 +131,7 @@ def get_importances_estimate_pairwise(combination, reference_model_features, arg
             vector_first, vector_second, X, args.heuristic,
         )
     elif 'max-value-coverage' in args.heuristic:
-        estimate_feature_importance = max_pair_coverage(vector_first, vector_second)
+        estimate_feature_importance = ranking_cov_alignment.max_pair_coverage(vector_first, vector_second)
 
     elif 'MI-numba' in args.heuristic:
         estimate_feature_importance = numba_mi(
