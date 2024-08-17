@@ -8,7 +8,7 @@ max_size = 10**6
 
 
 def max_pair_coverage(array1: npt.NDArray[np.int32], array2: npt.NDArray[np.int32]) -> float:
-    def hash_pair(el1, el2):
+    def hash_pair(el1: np.int32, el2: np.int32):
         return (el1 * 1471343 - el2) % max_size
 
     counts = np.zeros(max_size, dtype=np.int32)
