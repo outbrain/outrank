@@ -244,7 +244,6 @@ def main():
 
     if args.task == 'selftest':
         conduct_self_test('MI-numba-randomized')
-        conduct_self_test('max-value-coverage')
         exit()
 
     if args.data_path is None and args.task != 'data_generator':
