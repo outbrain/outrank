@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import numpy as np
+import numpy.typing as npt
 
 np.random.seed(123)
 max_size = 10**6
 
 
-def max_pair_coverage(array1: np.array, array2: np.array) -> float:
+def max_pair_coverage(array1: npt.NDArray[np.int32], array2: npt.NDArray[np.int32]) -> float:
     def hash_pair(el1, el2):
         return (el1 * 1471343 - el2) % max_size
 
