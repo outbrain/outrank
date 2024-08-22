@@ -16,13 +16,13 @@ logger = logging.getLogger('syn-logger')
 logger.setLevel(logging.DEBUG)
 
 
-def conduct_self_test():
+def conduct_self_test(heuristic='MI-numba-randomized'):
     # Simulate full flow, ranking only
     subprocess.run(
         'outrank --task data_generator --num_synthetic_rows 100000', shell=True,
     )
     subprocess.run(
-        'outrank --task ranking --data_path test_data_synthetic --data_source csv-raw;',
+        f'outrank --task ranking --data_path test_data_synthetic --data_source csv-raw --heuristic {heuristic};',
         shell=True,
     )
 
@@ -39,8 +39,10 @@ def conduct_self_test():
             logger.info(f'Removing {path} as part of cleanup ..')
             shutil.rmtree(path)
 
-    logger.info('All tests passed, OutRank seems in shape \N{winking face}')
+    logger.info(f'All tests passed for heuristic: {heuristic} \N{rocket}')
 
 
 if __name__ == '__main__':
-    conduct_self_test()
+    conduct_self_test('MI-numba-randomized')
+    conduct_self_test('max-value-coverage')
+    logger.info('OutRank seems in shape \N{winking face}')

@@ -18,6 +18,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
 
+from outrank.algorithms.feature_ranking import ranking_cov_alignment
 from outrank.core_utils import is_prior_heuristic
 
 logger = logging.getLogger('syn-logger')
@@ -129,6 +130,8 @@ def get_importances_estimate_pairwise(combination, reference_model_features, arg
         estimate_feature_importance = sklearn_surrogate(
             vector_first, vector_second, X, args.heuristic,
         )
+    elif 'max-value-coverage' in args.heuristic:
+        estimate_feature_importance = ranking_cov_alignment.max_pair_coverage(vector_first, vector_second)
 
     elif 'MI-numba' in args.heuristic:
         estimate_feature_importance = numba_mi(

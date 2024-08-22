@@ -243,7 +243,7 @@ def main():
     args = parser.parse_args()
 
     if args.task == 'selftest':
-        conduct_self_test()
+        conduct_self_test('MI-numba-randomized')
         exit()
 
     if args.data_path is None and args.task != 'data_generator':
