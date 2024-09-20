@@ -8,8 +8,8 @@ COMPREHENSIVE_TRANSFORMERS = EXTENDED_TRANSFORMERS.copy()
 powers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 shifts = [-1, 0, 1, 2, 5, 10]
 scales = [0.5, 1, 2, 5, 10, 50]
-Min_values = [-1, 0, 1, 10]
-Max_values = [1, 10, 100, 1000]
+Min_values = [-np.inf, -10, -1, 0, 1, 10, 100, 1000]
+Max_values = [1, 10, 100, 1000, 10000, np.inf]
 param_a = [0, 0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100, 500]
 
 for power in powers:
