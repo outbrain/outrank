@@ -265,6 +265,25 @@ VERBOSE_TRANSFORMERS = {
     '_tr_clip_outliers_5_95': 'np.clip(X, np.percentile(X, 5), np.percentile(X, 95))',
     '_tr_clip_outliers_10_90': 'np.clip(X, np.percentile(X, 10), np.percentile(X, 90))',
     '_tr_clip_outliers_25_75': 'np.clip(X, np.percentile(X, 25), np.percentile(X, 75))',
+    '_tr_boxcox_lambda_0.5': 'np.where(X > 0, (X ** 0.5 - 1) / 0.5, np.nan)',
+    '_tr_yeo_johnson_lambda_0': 'np.sign(X) * np.log(np.abs(X) + 1)',
+    '_tr_relu': 'np.maximum(0, X)',
+    '_tr_leaky_relu': 'np.where(X > 0, X, 0.01 * X)',
+    '_tr_elu': 'np.where(X > 0, X, np.exp(X) - 1)',
+    '_tr_softsign': 'X / (1 + np.abs(X))',
+    '_tr_swish': 'X / (1 + np.exp(-X))',
+    '_tr_gelu_approx': '0.5 * X * (1 + np.tanh(np.sqrt(2 / np.pi) * (X + 0.044715 * X ** 3)))',
+    '_tr_mish': 'X * np.tanh(np.log1p(np.exp(X)))',
+    '_tr_hard_sigmoid': 'np.clip((X + 1) / 2, 0, 1)',
+    '_tr_hard_tanh': 'np.clip(X, -1, 1)',
+    '_tr_swish_flick': 'X / (1 + np.exp(X))',
+    '_tr_reciprocal_softplus': '1 / np.log1p(np.exp(X))',
+    '_tr_bell_shape': 'np.exp(-X ** 2)',
+    '_tr_gumbel_smx': 'np.exp(-np.exp(-(X - 3.0) / 4.0))',
+    '_tr_gumbel_smx1': 'np.exp(-np.exp(-(X - 0.5) / 2.0))',
+    '_tr_gumbel_smx2': 'np.exp(-np.exp(-(X - 2.0) / 1.2))',
+    '_tr_fancy_beta': 'np.sqrt(2 * np.pi / X) * (X / np.e) ** X',
+    '_tr_energy_distance': 'np.sqrt(2 * np.var(X))'
 }
 
 
