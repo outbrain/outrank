@@ -1,22 +1,22 @@
-                        *///////////////.
-                     //////////////////////*
-                   */////////////////////////.
-                  ////////////// */////////////
-                  /////////*          /////////
-                 //////   /////   ////,   /////
-                  ////////     ///    /////////
-                  /////   /////  ./////   ////*
-                   ,////                 ////
-                     *////             ////.
-                         ///////*///////
+						*///////////////.
+					 //////////////////////*
+				   */////////////////////////.
+				  ////////////// */////////////
+				  /////////*          /////////
+				 //////   /////   ////,   /////
+				  ////////     ///    /////////
+				  /////   /////  ./////   ////*
+				   ,////                 ////
+					 *////             ////.
+						 ///////*///////
 
 
-    ░█████╗░██╗░░░██╗████████╗██████╗░░█████╗░███╗░░██╗██╗░░██╗
-    ██╔══██╗██║░░░██║╚══██╔══╝██╔══██╗██╔══██╗████╗░██║██║░██╔╝
-    ██║░░██║██║░░░██║░░░██║░░░██████╔╝███████║██╔██╗██║█████═╝░
-    ██║░░██║██║░░░██║░░░██║░░░██╔══██╗██╔══██║██║╚████║██╔═██╗░
-    ╚█████╔╝╚██████╔╝░░░██║░░░██║░░██║██║░░██║██║░╚███║██║░╚██╗
-    ░╚════╝░░╚═════╝░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚═╝░░╚═╝
+	░█████╗░██╗░░░██╗████████╗██████╗░░█████╗░███╗░░██╗██╗░░██╗
+	██╔══██╗██║░░░██║╚══██╔══╝██╔══██╗██╔══██╗████╗░██║██║░██╔╝
+	██║░░██║██║░░░██║░░░██║░░░██████╔╝███████║██╔██╗██║█████═╝░
+	██║░░██║██║░░░██║░░░██║░░░██╔══██╗██╔══██║██║╚████║██╔═██╗░
+	╚█████╔╝╚██████╔╝░░░██║░░░██║░░██║██║░░██║██║░╚███║██║░╚██╗
+	░╚════╝░░╚═════╝░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚═╝░░╚═╝
 
 [![CI - package](https://github.com/outbrain/outrank/actions/workflows/python-package.yml/badge.svg)](https://github.com/outbrain/outrank/actions/workflows/python-package.yml) [![CI - benchmark](https://github.com/outbrain/outrank/actions/workflows/benchmarks.yml/badge.svg)](https://github.com/outbrain/outrank/actions/workflows/benchmarks.yml) [![CI - selftest](https://github.com/outbrain/outrank/actions/workflows/selftest.yml/badge.svg)](https://github.com/outbrain/outrank/actions/workflows/selftest.yml) [![Unit tests](https://github.com/outbrain/outrank/actions/workflows/python-unit.yml/badge.svg)](https://github.com/outbrain/outrank/actions/workflows/python-unit.yml)
 
@@ -57,5 +57,14 @@ numpages = {6},
 keywords = {Feature ranking, massive data sets, AutoML, recommender systems},
 location = {Singapore, Singapore},
 series = {RecSys '23}
+}
+
+@article{krlj2023DrifterEO,
+  title={Drifter: Efficient Online Feature Monitoring for Improved Data Integrity in Large-Scale Recommendation Systems},
+  author={Bla{\vz} {\vS}krlj and Nir Ki-Tov and Lee Edelist and Natalia Silberstein and Hila Weisman-Zohar and Bla{\vz} Mramor and Davorin Kopic and Naama Ziporin},
+  journal={ArXiv},
+  year={2023},
+  volume={abs/2309.08617},
+  url={https://api.semanticscholar.org/CorpusID:262045065}
 }
 ```
