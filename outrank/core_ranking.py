@@ -424,101 +424,102 @@ def compute_value_counts(input_dataframe: pd.DataFrame, args: Any):
     global GLOBAL_RARE_VALUE_STORAGE
     global IGNORED_VALUES
 
+    ignored_values = IGNORED_VALUES
+    global_storage = GLOBAL_RARE_VALUE_STORAGE
+    rare_value_count_upper_bound = args.rare_value_count_upper_bound
+
     for column in input_dataframe.columns:
         main_values = input_dataframe[column].values
         for value in main_values:
-            if value not in IGNORED_VALUES:
-                GLOBAL_RARE_VALUE_STORAGE.update({(column, value): 1})
+            if value not in ignored_values:
+                global_storage[(column, value)] += 1
 
-    for key, val in GLOBAL_RARE_VALUE_STORAGE.items():
-        if val > args.rare_value_count_upper_bound:
-            IGNORED_VALUES.add(key)
+    keys_to_remove = []
+    for key, val in global_storage.items():
+        if val > rare_value_count_upper_bound:
+            ignored_values.add(key)
+            keys_to_remove.append(key)
 
-    for to_remove_val in IGNORED_VALUES:
-        del GLOBAL_RARE_VALUE_STORAGE[to_remove_val]
+    for key in keys_to_remove:
+        del global_storage[key]
+
+    # Update global variables
+    GLOBAL_RARE_VALUE_STORAGE = global_storage
+    IGNORED_VALUES = ignored_values
 
 
 def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any, max_unique_hist_constraint: int) -> None:
-    """Compute cardinalities of features, incrementally"""
-
     global GLOBAL_CARDINALITY_STORAGE
+    global GLOBAL_COUNTS_STORAGE
+
     output_storage_card = defaultdict(set)
-    for enx, column in enumerate(input_dataframe):
-        output_storage_card[column] = set(input_dataframe[column].unique())
+    for enx, column in enumerate(input_dataframe.columns):
+        column_data = input_dataframe[column]
+        unique_values = set(column_data.unique())
+        output_storage_card[column] = unique_values
+
         if column not in GLOBAL_CARDINALITY_STORAGE:
-            GLOBAL_CARDINALITY_STORAGE[column] = HyperLogLog(
-                HYPERLL_ERROR_BOUND,
-            )
+            GLOBAL_CARDINALITY_STORAGE[column] = HyperLogLog(HYPERLL_ERROR_BOUND)
 
         if column not in GLOBAL_COUNTS_STORAGE:
             GLOBAL_COUNTS_STORAGE[column] = PrimitiveConstrainedCounter(max_unique_hist_constraint)
 
-        [GLOBAL_COUNTS_STORAGE[column].add(value) for value in input_dataframe[column].values]
+        for value in column_data.values:
+            GLOBAL_COUNTS_STORAGE[column].add(value)
 
-        for unique_value in set(input_dataframe[column].unique()):
+        for unique_value in unique_values:
             if unique_value:
-                GLOBAL_CARDINALITY_STORAGE[column].add(
-                    internal_hash(unique_value),
-                )
+                GLOBAL_CARDINALITY_STORAGE[column].add(internal_hash(unique_value))
 
-        pbar.set_description(
-            f'Computing cardinality (Hyperloglog update) {enx}/{input_dataframe.shape[1]}',
-        )
+        pbar.set_description(f'Computing cardinality (Hyperloglog update) {enx+1}/{input_dataframe.shape[1]}')
 
 
 def compute_bounds_increment(
-    input_dataframe: pd.DataFrame, numeric_column_types: set[str],
-) -> dict[str, Any]:
-    all_features = input_dataframe.columns
+    input_dataframe: pd.DataFrame, numeric_column_types: Set[str]
+) -> Dict[str, Any]:
     numeric_column_types = set(numeric_column_types)
     summary_object = {}
-    summary_storage: Any = {}
-    for feature in all_features:
-        if feature in numeric_column_types:
-            feature_vector = pd.to_numeric(
-                input_dataframe[feature], errors='coerce',
-            )
-            minimum = np.min(feature_vector)
-            maximum = np.max(feature_vector)
-            mean = np.mean(feature_vector)
-            summary_storage = NumericFeatureSummary(
-                feature, minimum, maximum, mean, len(
-                    np.unique(feature_vector),
-                ),
-            )
-            summary_object[feature] = summary_storage
 
-        else:
-            feature_vector = input_dataframe[feature].values
-            summary_storage = NominalFeatureSummary(
-                feature, len(np.unique(feature_vector)),
+    for feature in input_dataframe.columns:
+        feature_vector = input_dataframe[feature]
+        if feature in numeric_column_types:
+            feature_vector = pd.to_numeric(feature_vector, errors='coerce')
+            summary_object[feature] = NumericFeatureSummary(
+                feature,
+                np.min(feature_vector),
+                np.max(feature_vector),
+                np.mean(feature_vector),
+                len(np.unique(feature_vector))
             )
-            summary_object[feature] = summary_storage
+        else:
+            summary_object[feature] = NominalFeatureSummary(
+                feature,
+                len(np.unique(feature_vector))
+            )
 
     return summary_object
 
 
 def compute_batch_ranking(
-    line_tmp_storage: list[list[Any]],
-    numeric_column_types: set[str],
+    line_tmp_storage: List[List[Any]],
+    numeric_column_types: Set[str],
     args: Any,
     cpu_pool: Any,
-    column_descriptions: list[str],
+    column_descriptions: List[str],
     logger: Any,
     pbar: Any,
-) -> tuple[BatchRankingSummary, dict[str, Any], dict[str, set[str]], dict[str, set[str]]]:
+) -> Tuple[
+    BatchRankingSummary, Dict[str, Any], Dict[str, Set[str]], Dict[str, Set[str]]
+]:
     """Enrich the feature space and compute the batch importances"""
 
-    input_dataframe = pd.DataFrame(line_tmp_storage)
-    input_dataframe.columns = column_descriptions
+    input_dataframe = pd.DataFrame(line_tmp_storage, columns=column_descriptions)
     pbar.set_description('Control features')
 
     if args.feature_set_focus:
+        focus_set = set()
         if args.feature_set_focus == '_all_from_reference_JSON':
-            focus_set = extract_features_from_reference_JSON(
-                args.reference_model_JSON,
-            )
-
+            focus_set = extract_features_from_reference_JSON(args.reference_model_JSON)
         else:
             focus_set = set(args.feature_set_focus.split(','))
 
@@ -527,60 +528,49 @@ def compute_batch_ranking(
         input_dataframe = input_dataframe[list(focus_set)]
 
     if args.transformers != 'none':
-
         pbar.set_description('Adding transformations')
         input_dataframe = enrich_with_transformations(
-            input_dataframe, numeric_column_types, logger, args,
+            input_dataframe, numeric_column_types, logger, args
         )
 
     if args.explode_multivalue_features != 'False':
         pbar.set_description('Constructing new features from multivalue ones')
         input_dataframe = compute_expanded_multivalue_features(
-            input_dataframe, logger, args, pbar,
+            input_dataframe, logger, args, pbar
         )
 
     if args.subfeature_mapping != 'False':
         pbar.set_description('Constructing new (sub)features')
-        input_dataframe = compute_subfeatures(
-            input_dataframe, logger, args, pbar,
-        )
+        input_dataframe = compute_subfeatures(input_dataframe, logger, args, pbar)
 
     if args.interaction_order > 1 or args.reference_model_JSON:
         pbar.set_description('Constructing new features')
-        input_dataframe = compute_combined_features(
-            input_dataframe, args, pbar,
-        )
+        input_dataframe = compute_combined_features(input_dataframe, args, pbar)
 
-    # in case of 3mr we compute the score of combinations against the target
     if '3mr' in args.heuristic:
-        pbar.set_description(
-            'Constructing features for computing relations in 3mr',
-        )
+        pbar.set_description('Constructing features for computing relations in 3mr')
         input_dataframe = compute_combined_features(
-            input_dataframe, args, pbar, True,
+            input_dataframe, args, pbar, True
         )
 
     if args.include_noise_baseline_features == 'True' and args.heuristic != 'Constant':
         pbar.set_description('Computing baseline features')
         input_dataframe = include_noisy_features(input_dataframe, logger, args)
 
-    # Compute incremental statistic useful for data inspection/transformer generation
     pbar.set_description('Computing coverage')
     coverage_storage = compute_coverage(input_dataframe, args)
     feature_memory_consumption = compute_feature_memory_consumption(
-        input_dataframe, args,
+        input_dataframe, args
     )
     compute_cardinalities(input_dataframe, pbar, args.max_unique_hist_constraint)
 
     if args.task == 'identify_rare_values':
         compute_value_counts(input_dataframe, args)
 
-    bounds_storage = compute_bounds_increment(
-        input_dataframe, numeric_column_types,
-    )
+    bounds_storage = compute_bounds_increment(input_dataframe, numeric_column_types)
 
     pbar.set_description(
-        f'Computing ranks for {input_dataframe.shape[1]} features',
+        f'Computing ranks for {input_dataframe.shape[1]} features'
     )
 
     return (
@@ -591,16 +581,14 @@ def compute_batch_ranking(
     )
 
 
-def get_grouped_df(importances_df_list: list[tuple[str, str, float]]) -> pd.DataFrame:
+def get_grouped_df(importances_df_list: List[Tuple[str, str, float]]) -> pd.DataFrame:
     """A helper method that enables median-based aggregation after processing"""
 
-    importances_df = pd.DataFrame(importances_df_list)
-    if len(importances_df) == 0:
+    importances_df = pd.DataFrame(importances_df_list, columns=['FeatureA', 'FeatureB', 'Score'])
+    if importances_df.empty:
         return None
-    importances_df.columns = ['FeatureA', 'FeatureB', 'Score']
-    grouped = importances_df.groupby(
-        ['FeatureA', 'FeatureB'],
-    ).median().reset_index()
+    grouped = importances_df.groupby(['FeatureA', 'FeatureB'], as_index=False).median()
+
     return grouped
 
 
