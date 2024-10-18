@@ -23,22 +23,22 @@ import xxhash
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
 pro_tips = [
-    'OutRank can construct subfeatures; features based on subspaces. Example command argument is: --subfeature_mapping "feature_a->feature_b;feature_c<->feature_d;feature_c<->feature_e"',
-    'Heuristic MI-numba-randomized seems like the best of both worlds! (speed + performance).',
-    'Heuristic surrogate-lr performs cross-validation (internally), keep that in mind!',
-    'Consider running OutRank on a smaller data sample first, might be enough (--subsampling = a lot).',
-    'There are two types of combinations supported; unsupervised pairwise ranking (redundancies- --target_ranking_only=False), and supervised combinations - (--interaction_order > 1)',
-    'Visualization part also includes clustering - this might be very insightful!',
-    'By default OutRank includes feature cardinality and coverage in feature names (card; cov)',
-    'Intermediary checkpoints (tmp_checkpoint.tsv) might already give you insights during longer runs.',
-    'In theory, you can rank redundancies of combined features (--interaction_order AND --target_ranking_only=False).',
-    'Give it as many threads as physically possible (--num_threads).',
-    'You can speed up ranking by diminishing feature buffer size (--combination_number_upper_bound determines how many ranking computations per batch will be considered). This, and --subsampling are very powerful together.',
-    'Want to rank feature transformations, but not sure which ones to choose? --transformers=default should serve as a solid baseline (common DS transformations included).',
-    'Your target can be any feature! (explaining one feature with others)',
-    'OutRank uses HyperLogLog for cardinality estimation - this is also a potential usecase (understanding cardinalities across different data sets).',
+    'OutRank can construct subfeatures based on subspaces. Use: --subfeature_mapping "feature_a->feature_b;feature_c<->feature_d;feature_c<->feature_e".',
+    'Heuristic MI-numba-randomized offers a great balance of speed and performance.',
+    'Heuristic surrogate-lr performs internal cross-validation; keep that in mind.',
+    'Consider running OutRank on a smaller sample first; it might be sufficient (--subsampling = a lot).',
+    'OutRank supports two types of combinations: unsupervised pairwise ranking (--target_ranking_only=False) and supervised combinations (--interaction_order > 1).',
+    'The visualization includes clustering, which can be very insightful!',
+    'By default, OutRank includes feature cardinality and coverage in feature names (e.g., card; cov).',
+    'Intermediary checkpoints (tmp_checkpoint.tsv) can provide insights during longer runs.',
+    'You can rank redundancies of combined features using --interaction_order and --target_ranking_only=False.',
+    'Use as many threads as possible for better performance (--num_threads).',
+    'Speed up ranking by reducing the feature buffer size (--combination_number_upper_bound) and using --subsampling together.',
+    'Not sure which feature transformations to choose? Use --transformers=default for a solid baseline (includes common DS transformations).',
+    'Your target can be any feature, allowing you to explain one feature with others.',
+    'OutRank uses HyperLogLog for cardinality estimation, useful for understanding cardinalities across datasets.',
     'Each feature is named as featureName(cardinality, coverage in percents) in the final files.',
-    'You can generate candidate feature transformation ranges (fw) by using --task=feature_summary_transformers.',
+    'Generate candidate feature transformation ranges using --task=feature_summary_transformers.',
 ]
 
 
