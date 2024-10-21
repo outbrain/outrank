@@ -186,7 +186,7 @@ if __name__ == '__main__':
 
     final_times = []
     for algo in ['MI-numba-randomized']:
-        for order in range(3, 4):
+        for order in range(12):
             for j in range(1):
                 start = time.time()
                 a = np.random.randint(1000, size=2**order).astype(np.int32)
