@@ -283,8 +283,16 @@ VERBOSE_TRANSFORMERS = {
     '_tr_gumbel_smx1': 'np.exp(-np.exp(-(X - 0.5) / 2.0))',
     '_tr_gumbel_smx2': 'np.exp(-np.exp(-(X - 2.0) / 1.2))',
     '_tr_fancy_beta': 'np.sqrt(2 * np.pi / X) * (X / np.e) ** X',
-    '_tr_energy_distance': 'np.sqrt(2 * np.var(X))'
+    '_tr_energy_distance': 'np.sqrt(2 * np.var(X))',
 }
+
+
+EXTENDED_ROUNDED_TRANSFORMERS = {}
+for k, v in EXTENDED_TRANSFORMERS.items():
+    for round_param in [1, 2, 3, 4]:
+        new_key = k + f'_round{round_param}'
+        new_value = f'np.round(np.astype(np.array(' + v + f'), np.float32), {round_param})'
+        EXTENDED_ROUNDED_TRANSFORMERS[new_key] = new_value
 
 
 if __name__ == '__main__':
