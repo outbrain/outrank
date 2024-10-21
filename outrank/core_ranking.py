@@ -455,7 +455,7 @@ def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any, max_unique_h
     output_storage_card = defaultdict(set)
     for enx, column in enumerate(input_dataframe.columns):
         column_data = input_dataframe[column]
-        unique_values = set(column_data.unique())
+        unique_values = set(column_data)
         output_storage_card[column] = unique_values
 
         if column not in GLOBAL_CARDINALITY_STORAGE:
@@ -475,8 +475,8 @@ def compute_cardinalities(input_dataframe: pd.DataFrame, pbar: Any, max_unique_h
 
 
 def compute_bounds_increment(
-    input_dataframe: pd.DataFrame, numeric_column_types: Set[str]
-) -> Dict[str, Any]:
+    input_dataframe: pd.DataFrame, numeric_column_types: set[str],
+) -> dict[str, Any]:
     numeric_column_types = set(numeric_column_types)
     summary_object = {}
 
@@ -489,27 +489,27 @@ def compute_bounds_increment(
                 np.min(feature_vector),
                 np.max(feature_vector),
                 np.mean(feature_vector),
-                len(np.unique(feature_vector))
+                len(np.unique(feature_vector)),
             )
         else:
             summary_object[feature] = NominalFeatureSummary(
                 feature,
-                len(np.unique(feature_vector))
+                len(np.unique(feature_vector)),
             )
 
     return summary_object
 
 
 def compute_batch_ranking(
-    line_tmp_storage: List[List[Any]],
-    numeric_column_types: Set[str],
+    line_tmp_storage: list[list[Any]],
+    numeric_column_types: set[str],
     args: Any,
     cpu_pool: Any,
-    column_descriptions: List[str],
+    column_descriptions: list[str],
     logger: Any,
     pbar: Any,
-) -> Tuple[
-    BatchRankingSummary, Dict[str, Any], Dict[str, Set[str]], Dict[str, Set[str]]
+) -> tuple[
+    BatchRankingSummary, dict[str, Any], dict[str, set[str]], dict[str, set[str]],
 ]:
     """Enrich the feature space and compute the batch importances"""
 
@@ -530,13 +530,13 @@ def compute_batch_ranking(
     if args.transformers != 'none':
         pbar.set_description('Adding transformations')
         input_dataframe = enrich_with_transformations(
-            input_dataframe, numeric_column_types, logger, args
+            input_dataframe, numeric_column_types, logger, args,
         )
 
     if args.explode_multivalue_features != 'False':
         pbar.set_description('Constructing new features from multivalue ones')
         input_dataframe = compute_expanded_multivalue_features(
-            input_dataframe, logger, args, pbar
+            input_dataframe, logger, args, pbar,
         )
 
     if args.subfeature_mapping != 'False':
@@ -550,7 +550,7 @@ def compute_batch_ranking(
     if '3mr' in args.heuristic:
         pbar.set_description('Constructing features for computing relations in 3mr')
         input_dataframe = compute_combined_features(
-            input_dataframe, args, pbar, True
+            input_dataframe, args, pbar, True,
         )
 
     if args.include_noise_baseline_features == 'True' and args.heuristic != 'Constant':
@@ -560,7 +560,7 @@ def compute_batch_ranking(
     pbar.set_description('Computing coverage')
     coverage_storage = compute_coverage(input_dataframe, args)
     feature_memory_consumption = compute_feature_memory_consumption(
-        input_dataframe, args
+        input_dataframe, args,
     )
     compute_cardinalities(input_dataframe, pbar, args.max_unique_hist_constraint)
 
@@ -570,7 +570,7 @@ def compute_batch_ranking(
     bounds_storage = compute_bounds_increment(input_dataframe, numeric_column_types)
 
     pbar.set_description(
-        f'Computing ranks for {input_dataframe.shape[1]} features'
+        f'Computing ranks for {input_dataframe.shape[1]} features',
     )
 
     return (
@@ -581,7 +581,7 @@ def compute_batch_ranking(
     )
 
 
-def get_grouped_df(importances_df_list: List[Tuple[str, str, float]]) -> pd.DataFrame:
+def get_grouped_df(importances_df_list: list[tuple[str, str, float]]) -> pd.DataFrame:
     """A helper method that enables median-based aggregation after processing"""
 
     importances_df = pd.DataFrame(importances_df_list, columns=['FeatureA', 'FeatureB', 'Score'])
