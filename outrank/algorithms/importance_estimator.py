@@ -3,13 +3,17 @@ from __future__ import annotations
 import logging
 import operator
 import traceback
-from typing import Any, Dict, List, Tuple
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
 from sklearn.feature_selection import mutual_info_classif
-from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import adjusted_mutual_info_score
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import OneHotEncoder
@@ -21,7 +25,7 @@ from outrank.core_utils import is_prior_heuristic
 logger = logging.getLogger('syn-logger')
 logger.setLevel(logging.DEBUG)
 
-num_folds = 4
+num_folds = 2
 
 try:
     from outrank.algorithms.feature_ranking import ranking_mi_numba
@@ -32,14 +36,18 @@ except ImportError:
 
 def sklearn_MI(vector_first: np.ndarray, vector_second: np.ndarray) -> float:
     return mutual_info_classif(
-        vector_first.reshape(-1, 1), vector_second.reshape(-1), discrete_features=True
+        vector_first.reshape(-1, 1), vector_second.reshape(-1), discrete_features=True,
     )[0]
 
 def sklearn_surrogate(
     vector_first: np.ndarray, vector_second: np.ndarray, X: np.ndarray, surrogate_model: str
+        , is_target: bool=False,
 ) -> float:
     clf = initialize_classifier(surrogate_model)
     transf = OneHotEncoder()
+
+    if not is_target:
+        return 1.0
 
     if len(np.unique(vector_second)) > 2:
         vector_first, vector_second = vector_second, vector_first
@@ -50,6 +58,7 @@ def sklearn_surrogate(
         X = np.concatenate((X, vector_first.reshape(-1, 1)), axis=1)
 
     X = transf.fit_transform(X)
+
     scores = cross_val_score(clf, X, vector_second, scoring='neg_log_loss', cv=num_folds)
     return 1 + np.median(scores)
 
@@ -65,7 +74,7 @@ def numba_mi(vector_first: np.ndarray, vector_second: np.ndarray, heuristic: str
 def sklearn_mi_adj(vector_first: np.ndarray, vector_second: np.ndarray) -> float:
     return adjusted_mutual_info_score(vector_first, vector_second)
 
-def get_importances_estimate_pairwise(combination: Tuple[str, str], reference_model_features: List[str], args: Any, tmp_df: pd.DataFrame) -> Tuple[str, str, float]:
+def get_importances_estimate_pairwise(combination: tuple[str, str], reference_model_features: list[str], args: Any, tmp_df: pd.DataFrame) -> tuple[str, str, float]:
     feature_one, feature_two = combination
 
     if feature_one not in tmp_df.columns or feature_two not in tmp_df.columns:
@@ -82,7 +91,7 @@ def get_importances_estimate_pairwise(combination: Tuple[str, str], reference_mo
         score = sklearn_MI(vector_first, vector_second)
     elif 'surrogate-' in args.heuristic:
         X = tmp_df[reference_model_features].values if is_prior_heuristic(args) and reference_model_features else np.array([])
-        score = sklearn_surrogate(vector_first, vector_second, X, args.heuristic)
+        score = sklearn_surrogate(vector_first, vector_second, X, args.heuristic, is_target=True if feature_two == 'label' else False)
     elif 'max-value-coverage' in args.heuristic:
         score = ranking_cov_alignment.max_pair_coverage(vector_first, vector_second)
     elif 'MI-numba' in args.heuristic:
@@ -99,9 +108,9 @@ def get_importances_estimate_pairwise(combination: Tuple[str, str], reference_mo
     return feature_one, feature_two, score
 
 def rank_features_3MR(
-    relevance_dict: Dict[str, float],
-    redundancy_dict: Dict[Tuple[Any, Any], Any],
-    relational_dict: Dict[Tuple[Any, Any], Any],
+    relevance_dict: dict[str, float],
+    redundancy_dict: dict[tuple[Any, Any], Any],
+    relational_dict: dict[tuple[Any, Any], Any],
     strategy: str = 'median',
     alpha: float = 1.0,
     beta: float = 1.0,
