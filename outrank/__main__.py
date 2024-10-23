@@ -205,6 +205,13 @@ def main():
     )
 
     parser.add_argument(
+        '--tldr',
+        type=str,
+        default='True',
+        help='If enabled, it will output some of the main results on the screen after finishing.',
+    )
+
+    parser.add_argument(
         '--num_synthetic_rows',
         type=int,
         default=1000000,

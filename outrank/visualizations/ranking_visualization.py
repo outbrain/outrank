@@ -43,7 +43,7 @@ def visualize_hierarchical_clusters(
         values='Score',
         index='FeatureA',
         columns='FeatureB',
-        aggfunc=np.mean,
+        aggfunc='mean',  # Updated from np.mean to 'mean'
     )
 
     pivot_table.fillna(0, inplace=True)
@@ -59,7 +59,7 @@ def visualize_hierarchical_clusters(
         )
         plt.title(f'Linkage function: {linkage_heuristic}')
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore", UserWarning)
+            warnings.simplefilter('ignore', UserWarning)
             plt.tight_layout()
         out_path = f'{output_folder}/dendrogram_{linkage_heuristic}.{image_format}'
         plt.savefig(out_path, dpi=300)
@@ -95,7 +95,7 @@ def visualize_hierarchical_clusters(
         dfx.columns = ['Silhouette', 'threshold', 'numClusters']
         sns.lineplot(x='numClusters', y='Silhouette', data=dfx, color='black')
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore", UserWarning)
+            warnings.simplefilter('ignore', UserWarning)
             plt.tight_layout()
         out_path = f'{output_folder}/SilhouetteProfile.{image_format}'
         plt.savefig(out_path, dpi=300)
@@ -113,7 +113,7 @@ def visualize_hierarchical_clusters(
             projected_data['ClusterID'] = top_clustering.astype(str)
             sns.scatterplot(x='Dim1', y='Dim2', hue='ClusterID', data=projected_data, palette='Set2')
             with warnings.catch_warnings():
-                warnings.simplefilter("ignore", UserWarning)
+                warnings.simplefilter('ignore', UserWarning)
                 plt.tight_layout()
             plt.savefig(f'{output_folder}/clustersEmbeddingVisualization.pdf', dpi=300)
             plt.clf()
@@ -130,7 +130,7 @@ def visualize_heatmap(
     sns.set(font_scale=2)
     fig, ax = plt.subplots()
     pivot_table = pd.pivot_table(
-        triplets, values='Score', index='FeatureA', columns='FeatureB', aggfunc=np.mean,
+        triplets, values='Score', index='FeatureA', columns='FeatureB', aggfunc='mean',  # Updated from np.mean to 'mean'
     )
     mask = np.zeros_like(pivot_table.values)
     mask[np.triu_indices_from(mask)] = True
@@ -160,7 +160,7 @@ def visualize_heatmap(
     plt.xlabel('')
     plt.ylabel('')
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", UserWarning)
+        warnings.simplefilter('ignore', UserWarning)
         plt.tight_layout()
     plt.savefig(f'{output_folder}/heatmap.{image_format}', dpi=500)
     plt.clf()
@@ -245,7 +245,7 @@ def visualize_barplots(
         plt.xlabel(f'Feature importance (based on heuristic {heuristic})')
         plt.ylabel('')
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore", UserWarning)
+            warnings.simplefilter('ignore', UserWarning)
             plt.tight_layout()
         plt.savefig(f'{output_folder}/barplot_top_{subset_range}.{image_format}', dpi=300)
         plt.clf()
