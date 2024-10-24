@@ -11,6 +11,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
+from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import mutual_info_classif
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import SGDClassifier
@@ -25,7 +26,7 @@ from outrank.core_utils import is_prior_heuristic
 logger = logging.getLogger('syn-logger')
 logger.setLevel(logging.DEBUG)
 
-num_folds = 2
+num_folds = 3
 
 try:
     from outrank.algorithms.feature_ranking import ranking_mi_numba
@@ -40,36 +41,24 @@ def sklearn_MI(vector_first: np.ndarray, vector_second: np.ndarray) -> float:
     )[0]
 
 def sklearn_surrogate(
-    vector_first: np.ndarray, vector_second: np.ndarray, X: np.ndarray, surrogate_model: str
-        , is_target: bool=False,
+    vector_first: np.ndarray, vector_second: np.ndarray,  surrogate_model: str,
 ) -> float:
     clf = initialize_classifier(surrogate_model)
     transf = OneHotEncoder()
-
-    if not is_target:
-        return 1.0
-
-    if len(np.unique(vector_second)) > 2:
-        vector_first, vector_second = vector_second, vector_first
-
-    if X.size <= 1:
-        X = vector_first.reshape(-1, 1)
-    else:
-        X = np.concatenate((X, vector_first.reshape(-1, 1)), axis=1)
-
-    X = transf.fit_transform(X)
-
+    X = transf.fit_transform(vector_first)
     scores = cross_val_score(clf, X, vector_second, scoring='neg_log_loss', cv=num_folds)
     return 1 + np.median(scores)
 
 def numba_mi(vector_first: np.ndarray, vector_second: np.ndarray, heuristic: str, mi_stratified_sampling_ratio: float) -> float:
     cardinality_correction = heuristic == 'MI-numba-randomized'
 
-    if vector_first.size == 2:
+    try:
         if vector_first.shape[1] == 1:
             vector_first = vector_first.reshape(-1)
         else:
             vector_first = np.apply_along_axis(lambda x: np.abs(np.max(x) - np.sum(x)), 1, vector_first).reshape(-1)
+    except:
+        logger.warning('Reshaping for MI computation in place - you are considering many-one mapping')
 
     return ranking_mi_numba.mutual_info_estimator_numba(
         vector_first.astype(np.int32),
@@ -105,9 +94,8 @@ def conduct_feature_ranking(vector_first: np.ndarray, vector_second: np.ndarray,
     if heuristic == 'MI':
         score = sklearn_MI(vector_first, vector_second)
 
-    elif heuristic in {'surrogate-SGD', 'surrogate-SVM', 'surrogate-SGD-prior'}:
-        logger.warning('surrogate-based models currently not available .. Try a MI-based one (e.g., MI-numba-randomized).')
-        score = 0.0
+    elif heuristic in {'surrogate-SGD', 'surrogate-SVM', 'surrogate-SGD-SVD'}:
+        score = sklearn_surrogate(vector_first, vector_second, heuristic)
 
     elif heuristic == 'max-value-coverage':
         score = ranking_cov_alignment.max_pair_coverage(vector_first, vector_second)
@@ -190,6 +178,9 @@ def initialize_classifier(surrogate_model: str):
         return SVC(gamma='auto', probability=True)
     elif 'surrogate-SGD' in surrogate_model:
         return SGDClassifier(max_iter=100000, loss='log_loss')
+    elif 'surrogate-SGD-SVD' in surrogate_model:
+        clf = Pipeline([('svd', TruncatedSVD(n_components=2**5)), ('reg', SGDClassifier(max_iter=100000, loss='log_loss'))])
+        return clf
     else:
         logger.warning(f'The chosen surrogate model {surrogate_model} is not supported, falling back to surrogate-SGD')
         return SGDClassifier(max_iter=100000, loss='log_loss')

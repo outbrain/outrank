@@ -18,7 +18,7 @@ logger = logging.getLogger('syn-logger')
 DATA_PATH = os.path.expanduser('~/datasets/toy')
 MODEL_SPEC_DIR = 'model_spec_dir'
 LABEL_COLUMN_NAME = 'label'
-HEURISTIC = 'MI-numba-randomized'
+HEURISTIC = 'surrogate-SGD-SVD'
 DATA_FORMAT = 'ob-vw'
 NUM_THREADS = 6
 INTERACTION_ORDER = 3
@@ -34,7 +34,7 @@ def run_outrank_task(reference_model_json: str, output_folder: str) -> None:
         f'--num_threads {NUM_THREADS} --interaction_order {INTERACTION_ORDER} '
         f'--output_folder {output_folder} --reference_model_JSON {reference_model_json} '
         f'--heuristic {HEURISTIC} --label_column {LABEL_COLUMN_NAME} '
-        f'--subsampling {SUBSAMPLING} --minibatch_size {MINIBATCH_SIZE} --disable_tqdm True;'
+        f'--subsampling {SUBSAMPLING} --minibatch_size {MINIBATCH_SIZE} --disable_tqdm False;'
     )
     logger.info(f'Running outrank command: {outrank_command}')
     subprocess.run(outrank_command, shell=True, check=True)
