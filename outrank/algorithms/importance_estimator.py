@@ -169,15 +169,20 @@ def get_importances_estimate_nonmyopic(args: Any, tmp_df: pd.DataFrame):
     pass
 
 def initialize_classifier(surrogate_model: str):
+
     if 'surrogate-LR' in surrogate_model:
         return LogisticRegression(max_iter=100000)
+
     elif 'surrogate-SVM' in surrogate_model:
         return SVC(gamma='auto', probability=True)
-    elif 'surrogate-SGD' in surrogate_model:
-        return SGDClassifier(max_iter=100000, loss='log_loss')
+
     elif 'surrogate-SGD-SVD' in surrogate_model:
         clf = Pipeline([('svd', TruncatedSVD(n_components=2**5)), ('reg', SGDClassifier(max_iter=100000, loss='log_loss'))])
         return clf
+
+    elif 'surrogate-SGD' in surrogate_model:
+        return SGDClassifier(max_iter=100000, loss='log_loss')
+
     else:
         logger.warning(f'The chosen surrogate model {surrogate_model} is not supported, falling back to surrogate-SGD')
         return SGDClassifier(max_iter=100000, loss='log_loss')
