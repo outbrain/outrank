@@ -28,7 +28,7 @@ class CategoricalClassification:
         }
 
     def __repr__(self):
-        return f"CategoricalClassification(dataset_info={self.dataset_info})"
+        return f'CategoricalClassification(dataset_info={self.dataset_info})'
 
     def generate_data(
         self,

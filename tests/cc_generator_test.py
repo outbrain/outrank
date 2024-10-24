@@ -5,7 +5,9 @@ import unittest
 import numpy as np
 from scipy.stats import pearsonr
 
-from outrank.algorithms.synthetic_data_generators.cc_generator import CategoricalClassification
+from outrank.algorithms.synthetic_data_generators.cc_generator import \
+    CategoricalClassification
+
 
 class TestCategoricalClassification(unittest.TestCase):
 
