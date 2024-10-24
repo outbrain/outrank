@@ -68,7 +68,7 @@ def initialize_model_spec_dir() -> None:
     """Initialize the model specification directory with the initial JSON file."""
     command = (
         'mkdir -p model_spec_dir && '
-        'rm -rvf model_spec_dir/* && '
+        'rm -rv model_spec_dir/* && '
         'echo \'{"desc": {"features": []}}\' > ./model_spec_dir/model_0.json'
     )
     subprocess.run(command, shell=True, check=True)

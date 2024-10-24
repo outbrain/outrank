@@ -77,7 +77,7 @@ def generate_data_for_ranking(combination: tuple[str, str], reference_model_feat
         feature_one = feature_two
         feature_two = args.label_column
 
-    if args.reference_model_JSON != '' and args.reference_model_JSON is not None:
+    if args.reference_model_JSON:
         vector_first = tmp_df[list(reference_model_features) + [feature_one]].values
     else:
         vector_first = tmp_df[feature_one].values
