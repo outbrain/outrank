@@ -18,12 +18,12 @@ logger = logging.getLogger('syn-logger')
 DATA_PATH = os.path.expanduser('~/datasets/toy')
 MODEL_SPEC_DIR = 'model_spec_dir'
 LABEL_COLUMN_NAME = 'label'
-HEURISTIC = 'surrogate-SGD-prior'
+HEURISTIC = 'MI-numba-randomized'
 DATA_FORMAT = 'ob-vw'
 NUM_THREADS = 6
 INTERACTION_ORDER = 2
-COMBINATION_NUMBER_BOUND = 300
-MINIBATCH_SIZE = 30_000
+COMBINATION_NUMBER_BOUND = 1_000
+MINIBATCH_SIZE = 10_000
 SUBSAMPLING = 1
 
 def run_outrank_task(reference_model_json: str, output_folder: str) -> None:
@@ -43,7 +43,6 @@ def run_outrank_task(reference_model_json: str, output_folder: str) -> None:
 def process_results(output_folder: str) -> str:
     """Read the results and extract the best feature."""
     results = pd.read_csv(os.path.join(output_folder, 'feature_singles.tsv'), delimiter='\t')
-    logger.info(f'Results head:\n{results.head(5)}')
     best_feature = '-'.join(results.Feature.iloc[1].split('-')[:-1])
     best_feature = ','.join(best_feature.split(' AND '))
     logger.info(f'Best feature: {best_feature}')

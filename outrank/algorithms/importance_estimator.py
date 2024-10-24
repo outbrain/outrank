@@ -64,6 +64,12 @@ def sklearn_surrogate(
 
 def numba_mi(vector_first: np.ndarray, vector_second: np.ndarray, heuristic: str, mi_stratified_sampling_ratio: float) -> float:
     cardinality_correction = heuristic == 'MI-numba-randomized'
+
+    if vector_first.shape[1] == 1:
+        vector_first = vector_first.reshape(-1)
+    else:
+        vector_first = np.apply_along_axis(lambda x: np.abs(np.max(x) - np.sum(x)), 1, vector_first).reshape(-1)
+
     return ranking_mi_numba.mutual_info_estimator_numba(
         vector_first.astype(np.int32),
         vector_second.astype(np.int32),
@@ -74,38 +80,64 @@ def numba_mi(vector_first: np.ndarray, vector_second: np.ndarray, heuristic: str
 def sklearn_mi_adj(vector_first: np.ndarray, vector_second: np.ndarray) -> float:
     return adjusted_mutual_info_score(vector_first, vector_second)
 
-def get_importances_estimate_pairwise(combination: tuple[str, str], reference_model_features: list[str], args: Any, tmp_df: pd.DataFrame) -> tuple[str, str, float]:
+def generate_data_for_ranking(combination: tuple[str, str], reference_model_features: list[str], args: Any, tmp_df: pd.DataFrame) -> tuple(np.ndarray, np.ndrray):
     feature_one, feature_two = combination
 
-    if feature_one not in tmp_df.columns or feature_two not in tmp_df.columns:
-        logger.info(f'{feature_one} or {feature_two} not found in the constructed data frame.')
-        return feature_one, feature_two, 0.0
+    if feature_one == args.label_column:
+        feature_one = feature_two
+        feature_two = args.label_column
 
-    vector_first = tmp_df[feature_one].values
-    vector_second = tmp_df[feature_two].values
-
-    if vector_first.size == 0 or vector_second.size == 0:
-        return feature_one, feature_two, 0.0
-
-    if args.heuristic == 'MI':
-        score = sklearn_MI(vector_first, vector_second)
-    elif 'surrogate-' in args.heuristic:
-        X = tmp_df[reference_model_features].values if is_prior_heuristic(args) and reference_model_features else np.array([])
-        score = sklearn_surrogate(vector_first, vector_second, X, args.heuristic, is_target=True if feature_two == 'label' else False)
-    elif 'max-value-coverage' in args.heuristic:
-        score = ranking_cov_alignment.max_pair_coverage(vector_first, vector_second)
-    elif 'MI-numba' in args.heuristic:
-        score = numba_mi(vector_first, vector_second, args.heuristic, args.mi_stratified_sampling_ratio)
-    elif args.heuristic == 'AMI':
-        score = sklearn_mi_adj(vector_first, vector_second)
-    elif args.heuristic == 'correlation-Pearson':
-        score = pearsonr(vector_first, vector_second)[0]
-    elif args.heuristic == 'Constant':
-        score = 0.0
+    if args.reference_model_JSON != '' and args.reference_model_JSON is not None:
+        vector_first = tmp_df[list(reference_model_features) + [feature_one]].values
     else:
-        raise ValueError('Please select a valid heuristic (MI, chi2, etc.).')
+        vector_first = tmp_df[feature_one].values
 
-    return feature_one, feature_two, score
+    vector_second = tmp_df[feature_two].values
+    return vector_first, vector_second
+
+
+def conduct_feature_ranking(vector_first: np.ndarray, vector_second: np.ndarray, args: Any) -> float:
+
+    heuristic = args.heuristic
+    score = 0.0
+
+    if heuristic == 'MI':
+        score = sklearn_MI(vector_first, vector_second)
+
+    elif heuristic in {'surrogate-SGD', 'surrogate-SVM', 'surrogate-SGD-prior'}:
+        logger.warning('surrogate-based models currently not available .. Try a MI-based one (e.g., MI-numba-randomized).')
+        score = 0.0
+
+    elif heuristic == 'max-value-coverage':
+        score = ranking_cov_alignment.max_pair_coverage(vector_first, vector_second)
+
+    elif heuristic == 'MI-numba-randomized':
+        score = numba_mi(vector_first, vector_second, heuristic, args.mi_stratified_sampling_ratio)
+
+    elif heuristic == 'AMI':
+        score = sklearn_mi_adj(vector_first, vector_second)
+
+    elif heuristic == 'correlation-Pearson':
+        score = pearsonr(vector_first, vector_second)[0]
+
+    elif heuristic == 'Constant':
+        score = 0.0
+
+    else:
+        logger.warning(f'{heuristic} not defined!')
+        score = 0.0
+
+    return score
+
+def get_importances_estimate_pairwise(combination: tuple[str, str], reference_model_features: list[str], args: Any, tmp_df: pd.DataFrame) -> tuple[str, str, float]:
+
+    feature_one, feature_two = combination
+    inputs_encoded, output_encoded = generate_data_for_ranking(combination, reference_model_features, args, tmp_df)
+
+    ranking_score = conduct_feature_ranking(inputs_encoded, output_encoded, args)
+
+    return feature_one, feature_two, ranking_score
+
 
 def rank_features_3MR(
     relevance_dict: dict[str, float],

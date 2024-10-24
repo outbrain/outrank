@@ -647,7 +647,7 @@ def summarize_rare_counts(
 
 
 def is_prior_heuristic(args: Any) -> bool:
-    if '-prior' in args.heuristic and args.reference_model_JSON:
+    if 'MI-numba-randomized' and args.reference_model_JSON:
         return True
     return False
 
