@@ -41,8 +41,7 @@ def sklearn_surrogate(
     vector_first: np.ndarray, vector_second: np.ndarray,  surrogate_model: str,
 ) -> float:
     clf = initialize_classifier(surrogate_model)
-    transf = OneHotEncoder()
-    X = transf.fit_transform(vector_first)
+    X = OneHotEncoder().fit_transform(vector_first)
     scores = cross_val_score(clf, X, vector_second, scoring='neg_log_loss', cv=num_folds)
     return 1 + np.median(scores)
 

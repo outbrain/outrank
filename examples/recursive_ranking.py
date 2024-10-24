@@ -17,13 +17,13 @@ logger = logging.getLogger('syn-logger')
 DATA_PATH = os.path.expanduser('~/datasets/toy')
 MODEL_SPEC_DIR = 'model_spec_dir'
 LABEL_COLUMN_NAME = 'label'
-HEURISTIC = 'surrogate-SGD-SVD'
+HEURISTIC = 'surrogate-SGD'
 DATA_FORMAT = 'ob-vw'
 NUM_THREADS = 6
-INTERACTION_ORDER = 3
+INTERACTION_ORDER = 2
 COMBINATION_NUMBER_BOUND = 1_000
 MINIBATCH_SIZE = 10_000
-SUBSAMPLING = 1
+SUBSAMPLING = 10
 
 def run_outrank_task(reference_model_json: str, output_folder: str) -> None:
     """Run the outrank task with the specified parameters."""
@@ -97,7 +97,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         '--iterations',
         type=int,
-        default=10,
+        default=80,
         help='Number of iterations to run (default: 10)',
     )
     return parser.parse_args()
