@@ -20,6 +20,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 import tqdm
+import xxhash
 
 from outrank.algorithms.importance_estimator import \
     get_importances_estimate_pairwise
@@ -185,11 +186,6 @@ def enrich_with_transformations(
 
     return transformed_df
 
-
-import pandas as pd
-import itertools
-import numpy as np
-import xxhash  # Assuming xxhash is used for hashing
 
 def compute_combined_features(
     input_dataframe: pd.DataFrame,
