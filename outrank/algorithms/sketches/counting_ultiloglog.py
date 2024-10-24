@@ -62,13 +62,7 @@ class HyperLogLogWCache:
 if __name__ == '__main__':
     import random
     import string
-    import time
 
-    import matplotlib.pyplot as plt
-    import pandas as pd
-    import seaborn as sns
-    import tqdm
-    from pympler import asizeof
 
     def get_random_string(length):
         # choose from all lowercase letter

@@ -9,12 +9,6 @@ from collections import Counter
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -199,7 +193,7 @@ def parse_ob_line_vw(
     ]
     if not include_namespace_info:
         the_real_instance = [
-            x[2:] if not x is None else None for x in the_real_instance
+            x[2:] if x is not None else None for x in the_real_instance
         ]
 
     parts = [label] + the_real_instance
@@ -268,7 +262,7 @@ def parse_namespace(namespace_path: str) -> tuple[set[str], dict[str, str]]:
                 id_feature_map[fw_id] = feature
                 if type_name == 'f32':
                     float_set.add(feature)
-            except Exception as es:
+            except Exception:
                 pass
 
     return float_set, id_feature_map

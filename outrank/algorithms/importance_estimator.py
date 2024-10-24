@@ -4,9 +4,6 @@ import logging
 import operator
 import traceback
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -21,7 +18,6 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
 
 from outrank.algorithms.feature_ranking import ranking_cov_alignment
-from outrank.core_utils import is_prior_heuristic
 
 logger = logging.getLogger('syn-logger')
 logger.setLevel(logging.DEBUG)

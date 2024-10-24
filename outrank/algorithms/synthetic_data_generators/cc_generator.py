@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-from typing import List
 from typing import Literal
 from typing import Optional
-from typing import Tuple
-from typing import Union
 
 import numpy as np
 from numpy.typing import ArrayLike
