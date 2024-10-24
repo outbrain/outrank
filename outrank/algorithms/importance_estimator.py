@@ -65,10 +65,11 @@ def sklearn_surrogate(
 def numba_mi(vector_first: np.ndarray, vector_second: np.ndarray, heuristic: str, mi_stratified_sampling_ratio: float) -> float:
     cardinality_correction = heuristic == 'MI-numba-randomized'
 
-    if vector_first.shape[1] == 1:
-        vector_first = vector_first.reshape(-1)
-    else:
-        vector_first = np.apply_along_axis(lambda x: np.abs(np.max(x) - np.sum(x)), 1, vector_first).reshape(-1)
+    if vector_first.size == 2:
+        if vector_first.shape[1] == 1:
+            vector_first = vector_first.reshape(-1)
+        else:
+            vector_first = np.apply_along_axis(lambda x: np.abs(np.max(x) - np.sum(x)), 1, vector_first).reshape(-1)
 
     return ranking_mi_numba.mutual_info_estimator_numba(
         vector_first.astype(np.int32),
