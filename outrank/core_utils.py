@@ -641,7 +641,7 @@ def summarize_rare_counts(
 
 
 def is_prior_heuristic(args: Any) -> bool:
-    if args.heuristic in {'surrogate-SGD', 'surrogate-SVM', 'surrogate-SGD-SVD'} and args.reference_model_JSON:
+    if args.heuristic in {'surrogate-SGD', 'surrogate-SVM', 'surrogate-SGD-RP'} and args.reference_model_JSON:
         return True
     return False
 

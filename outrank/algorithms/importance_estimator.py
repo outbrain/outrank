@@ -8,6 +8,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
+from sklearn import random_projection
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import mutual_info_classif
 from sklearn.linear_model import LogisticRegression
@@ -23,7 +24,8 @@ from outrank.algorithms.feature_ranking import ranking_cov_alignment
 logger = logging.getLogger('syn-logger')
 logger.setLevel(logging.DEBUG)
 
-num_folds = 3
+NUM_FOLDS  = 2
+SVD_DIMS = 2
 
 try:
     from outrank.algorithms.feature_ranking import ranking_mi_numba
@@ -40,9 +42,14 @@ def sklearn_MI(vector_first: np.ndarray, vector_second: np.ndarray) -> float:
 def sklearn_surrogate(
     vector_first: np.ndarray, vector_second: np.ndarray,  surrogate_model: str,
 ) -> float:
-    clf = initialize_classifier(surrogate_model)
     X = OneHotEncoder().fit_transform(vector_first)
-    scores = cross_val_score(clf, X, vector_second, scoring='neg_log_loss', cv=num_folds)
+
+    if '-SVD' in surrogate_model and X.shape[1] > 2:
+        # yes this is not super correct due to embedding full data first, but it's much faster + seems to offer same results anyways.
+        X = TruncatedSVD(n_components=min(SVD_DIMS, X.shape[1])).fit_transform(X)
+
+    clf = initialize_classifier(surrogate_model, n_dim=min(X.shape[1], 1024))
+    scores = cross_val_score(clf, X, vector_second, scoring='neg_log_loss', cv=NUM_FOLDS)
     return 1 + np.median(scores)
 
 def numba_mi(vector_first: np.ndarray, vector_second: np.ndarray, heuristic: str, mi_stratified_sampling_ratio: float) -> float:
@@ -90,7 +97,7 @@ def conduct_feature_ranking(vector_first: np.ndarray, vector_second: np.ndarray,
     if heuristic == 'MI':
         score = sklearn_MI(vector_first, vector_second)
 
-    elif heuristic in {'surrogate-SGD', 'surrogate-SVM', 'surrogate-SGD-SVD'}:
+    elif heuristic in {'surrogate-SGD', 'surrogate-SVM', 'surrogate-SGD-RP', 'surrogate-SGD-SVD'}:
         score = sklearn_surrogate(vector_first, vector_second, heuristic)
 
     elif heuristic == 'max-value-coverage':
@@ -167,7 +174,7 @@ def rank_features_3MR(
 def get_importances_estimate_nonmyopic(args: Any, tmp_df: pd.DataFrame):
     pass
 
-def initialize_classifier(surrogate_model: str):
+def initialize_classifier(surrogate_model: str, n_dim: int) -> Any:
 
     if 'surrogate-LR' in surrogate_model:
         return LogisticRegression(max_iter=100000)
@@ -175,8 +182,8 @@ def initialize_classifier(surrogate_model: str):
     elif 'surrogate-SVM' in surrogate_model:
         return SVC(gamma='auto', probability=True)
 
-    elif 'surrogate-SGD-SVD' in surrogate_model:
-        clf = Pipeline([('svd', TruncatedSVD(n_components=2**5)), ('reg', SGDClassifier(max_iter=100000, loss='log_loss'))])
+    elif 'surrogate-SGD-RP' in surrogate_model:
+        clf = Pipeline([('proj', random_projection.SparseRandomProjection(n_components=n_dim)), ('reg', SGDClassifier(max_iter=100000, loss='log_loss'))])
         return clf
 
     elif 'surrogate-SGD' in surrogate_model:
