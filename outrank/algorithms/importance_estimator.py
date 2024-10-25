@@ -25,7 +25,7 @@ logger = logging.getLogger('syn-logger')
 logger.setLevel(logging.DEBUG)
 
 NUM_FOLDS  = 2
-SVD_DIMS = 2
+SVD_DIMS = 8
 
 try:
     from outrank.algorithms.feature_ranking import ranking_mi_numba
