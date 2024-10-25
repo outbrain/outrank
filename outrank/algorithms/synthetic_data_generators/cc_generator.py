@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-from typing import List
 from typing import Literal
 from typing import Optional
-from typing import Tuple
-from typing import Union
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -28,7 +25,7 @@ class CategoricalClassification:
         }
 
     def __repr__(self):
-        return f"CategoricalClassification(dataset_info={self.dataset_info})"
+        return f'CategoricalClassification(dataset_info={self.dataset_info})'
 
     def generate_data(
         self,

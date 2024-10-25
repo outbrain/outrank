@@ -26,7 +26,6 @@ if __name__ == '__main__':
 
     depth = 8
     width = 2**22
-    import numpy as np
     cms = PrimitiveConstrainedCounter()
 
     items = [1, 1, 2, 3, 3, 3, 4, 5, 2] * 10000

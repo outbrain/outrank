@@ -291,7 +291,7 @@ EXTENDED_ROUNDED_TRANSFORMERS = {}
 for k, v in EXTENDED_TRANSFORMERS.items():
     for round_param in [1, 2, 3, 4]:
         new_key = k + f'_round{round_param}'
-        new_value = f'np.round(np.astype(np.array(' + v + f'), np.float32), {round_param})'
+        new_value = 'np.round(np.astype(np.array(' + v + f'), np.float32), {round_param})'
         EXTENDED_ROUNDED_TRANSFORMERS[new_key] = new_value
 
 

@@ -2,14 +2,17 @@ from __future__ import annotations
 
 import gzip
 import os
-from collections import Counter, defaultdict
+from collections import Counter
+from collections import defaultdict
 from typing import Any
 
 import numpy as np
 import pandas as pd
 import tqdm
 
-from outrank.core_utils import generic_line_parser, get_dataset_info, get_num_of_instances
+from outrank.core_utils import generic_line_parser
+from outrank.core_utils import get_dataset_info
+from outrank.core_utils import get_num_of_instances
 
 try:
     import matplotlib.pyplot as plt
@@ -36,7 +39,7 @@ def score_line(line: list[str]) -> dict[str, float]:
         'empty_dict': empty_dict_prop,
         'all_empty': all_empty_prop,
         'all_zero': all_zero_prop,
-        'row_entropy': compute_average_entropy(line)
+        'row_entropy': compute_average_entropy(line),
     }
 
     for j in [30, 60, 100, 200, 300]:

@@ -11,15 +11,11 @@ from collections import defaultdict
 from collections import deque
 from timeit import default_timer as timer
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Set
-from typing import Tuple
-from typing import Union
 
 import numpy as np
 import pandas as pd
 import tqdm
+import xxhash
 
 from outrank.algorithms.importance_estimator import \
     get_importances_estimate_pairwise
@@ -200,18 +196,16 @@ def compute_combined_features(
     join_string = ' AND_REL ' if is_3mr else ' AND '
     interaction_order = 2 if is_3mr else args.interaction_order
 
-    model_combinations = []
     full_combination_space = []
 
-
     if args.interaction_order > 1:
-            full_combination_space = list(
-                itertools.combinations(all_columns, interaction_order),
-            )
+        full_combination_space = list(
+            itertools.combinations(all_columns, interaction_order),
+        )
     full_combination_space = prior_combinations_sample(full_combination_space, args)
 
     if args.reference_model_JSON != '':
-        model_combinations = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only = True)
+        model_combinations = extract_features_from_reference_JSON(args.reference_model_JSON, combined_features_only=True)
         model_combinations = [tuple(sorted(combination.split(','))) for combination in model_combinations]
         if not is_prior_heuristic(args):
             full_combination_space = model_combinations
@@ -219,25 +213,20 @@ def compute_combined_features(
     if is_prior_heuristic(args):
         full_combination_space = full_combination_space + [tuple for tuple in model_combinations if tuple not in full_combination_space]
 
+    def combine_features(new_combination):
+        combined_feature = input_dataframe[new_combination[0]].astype(str)
+        for feature in new_combination[1:]:
+            combined_feature += input_dataframe[feature].astype(str)
+        combined_feature = combined_feature.apply(lambda x: xxhash.xxh64(x).hexdigest())
+        ftr_name = join_string.join(new_combination)
+        return ftr_name, combined_feature
 
-    com_counter = 0
     new_feature_hash = {}
-    for new_combination in full_combination_space:
-        pbar.set_description(
-            f'Created {com_counter}/{len(full_combination_space)}',
-        )
-        combined_feature: list[str] = [str(0)] * input_dataframe.shape[0]
-        for feature in new_combination:
-            tmp_feature = input_dataframe[feature].tolist()
-            for enx, el in enumerate(tmp_feature):
-                combined_feature[enx] = str(
-                    internal_hash(
-                        str(combined_feature[enx]) + str(el),
-                    ),
-                )
-        ftr_name = join_string.join(str(x) for x in new_combination)
+    for idx, new_combination in enumerate(full_combination_space):
+        pbar.set_description(f'Created {idx + 1}/{len(full_combination_space)}')
+        ftr_name, combined_feature = combine_features(new_combination)
         new_feature_hash[ftr_name] = combined_feature
-        com_counter += 1
+
     tmp_df = pd.DataFrame(new_feature_hash)
     pbar.set_description('Concatenating into final frame ..')
     input_dataframe = pd.concat([input_dataframe, tmp_df], axis=1)
