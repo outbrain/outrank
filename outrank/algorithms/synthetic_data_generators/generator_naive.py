@@ -24,7 +24,7 @@ if __name__ == '__main__':
     import os
     import shutil
 
-    import pandas as pd
+    import fireducks.pandas as pd
 
     logging.basicConfig(
         format='%(asctime)s - %(message)s',

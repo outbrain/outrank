@@ -4,8 +4,8 @@ import sys
 import unittest
 from dataclasses import dataclass
 
+import fireducks.pandas as pd
 import numpy as np
-import pandas as pd
 import tqdm
 from pathos.multiprocessing import ProcessingPool as Pool
 

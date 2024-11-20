@@ -12,8 +12,8 @@ from collections import deque
 from timeit import default_timer as timer
 from typing import Any
 
+import fireducks.pandas as pd
 import numpy as np
-import pandas as pd
 import tqdm
 import xxhash
 

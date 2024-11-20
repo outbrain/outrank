@@ -4,8 +4,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import fireducks.pandas as pd
 import numpy as np
-import pandas as pd
 
 import outrank.feature_transformations.feature_transformer_vault as transformer_vault
 from outrank.core_utils import internal_hash

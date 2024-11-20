@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 
-import pandas as pd
+import fireducks.pandas as pd
 
 from outrank.visualizations.ranking_visualization import visualize_all
 

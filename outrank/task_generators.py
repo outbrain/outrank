@@ -5,7 +5,7 @@ import logging
 import os
 import shutil
 
-import pandas as pd
+import fireducks.pandas as pd
 
 from outrank.algorithms.synthetic_data_generators import generator_naive
 

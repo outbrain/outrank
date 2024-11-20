@@ -5,8 +5,8 @@ import operator
 import traceback
 from typing import Any
 
+import fireducks.pandas as pd
 import numpy as np
-import pandas as pd
 from scipy.stats import pearsonr
 from sklearn import random_projection
 from sklearn.decomposition import TruncatedSVD

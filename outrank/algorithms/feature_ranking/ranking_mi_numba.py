@@ -178,7 +178,7 @@ def mutual_info_estimator_numba(
 
 
 if __name__ == '__main__':
-    import pandas as pd
+    import fireducks.pandas as pd
     from sklearn.feature_selection import mutual_info_classif
 
     np.random.seed(123)

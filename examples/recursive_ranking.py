@@ -7,7 +7,7 @@ import os
 import shutil
 import subprocess
 
-import pandas as pd
+import fireducks.pandas as pd
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')

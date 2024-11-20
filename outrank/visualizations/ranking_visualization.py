@@ -4,9 +4,9 @@ import logging
 import os
 import warnings
 
+import fireducks.pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import seaborn as sns
 from scipy.cluster import hierarchy
 from sklearn.manifold import TSNE

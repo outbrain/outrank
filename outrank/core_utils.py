@@ -10,8 +10,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
 
+import fireducks.pandas as pd
 import numpy as np
-import pandas as pd
 import xxhash
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)

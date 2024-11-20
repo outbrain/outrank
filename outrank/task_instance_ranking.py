@@ -6,8 +6,8 @@ from collections import Counter
 from collections import defaultdict
 from typing import Any
 
+import fireducks.pandas as pd
 import numpy as np
-import pandas as pd
 import tqdm
 
 from outrank.core_utils import generic_line_parser

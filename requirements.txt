@@ -1,3 +1,4 @@
+fireducks>=1.1.0
 flake8>=6.1.0
 matplotlib>=3.7.2
 numba>=0.55.1
