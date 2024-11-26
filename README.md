@@ -23,7 +23,7 @@
 > The design of modern recommender systems relies on understanding which parts of the feature space are relevant for solving a given recommendation task. However, real-world data sets in this domain are often characterized by their large size, sparsity, and noise, making it challenging to identify meaningful signals. Feature ranking represents an efficient branch of algorithms that can help address these challenges by identifying the most informative features and facilitating the automated search for more compact and better-performing models (AutoML). We introduce OutRank, a system for versatile feature ranking and data quality-related anomaly detection. OutRank was built with categorical data in mind, utilizing a variant of mutual information that is normalized with regard to the noise produced by features of the same cardinality. We further extend the similarity measure by incorporating information on feature similarity and combined relevance.
 
 # Getting started
-Minimal examples and an interface to explore OutRank's functionality are available as [the docs](https://outbrain.github.io/outrank/outrank.html).
+Minimal examples and an interface to explore OutRank's functionality are available as [the docs](https://outbrain-inc.github.io/outrank/outrank.html).
 
 # Contributing
 1. Make sure the functionality is not already implemented!
